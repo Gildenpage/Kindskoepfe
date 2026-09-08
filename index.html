@@ -3384,6 +3384,120 @@ main > .raid-list-promo.raid-list-promo-wide{
 }
 </style>
 
+<style id="clear-registered-player-profiles">
+/* Übersichtlichere angemeldete Spielerprofile – im Admin-Modus mit klarer Statusverwaltung */
+.raid-card .player-card{
+  overflow:visible;
+}
+.raid-card .player-card-top{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+  padding-right:24px;
+}
+.raid-card .player-card-top strong{
+  flex:1 1 auto;
+  min-width:0;
+}
+.raid-card .admin-profile-badge{
+  flex:0 0 auto;
+  padding:2px 6px;
+  border:1px solid rgba(243,200,91,.30);
+  border-radius:999px;
+  background:rgba(243,200,91,.09);
+  color:#f3c85b;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.7px;
+}
+.raid-card .player-character{
+  color:#b6bdca!important;
+}
+.raid-card .player-spec{
+  color:#8f99aa!important;
+}
+.raid-card .player-info-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-top:auto;
+  padding-top:8px;
+}
+.raid-card .player-role-chip,.raid-card .player-gs-chip{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:3px 7px;
+  border-radius:7px;
+  font-size:11px;
+  font-weight:700;
+  box-sizing:border-box;
+}
+.raid-card .player-role-chip{
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.08);
+  color:#dce2eb;
+}
+.raid-card .player-role-chip.tank{color:#b8d9ff}
+.raid-card .player-role-chip.heal{color:#8de7ae}
+.raid-card .player-role-chip.dd{color:#ffb0b0}
+.raid-card .player-gs-chip{
+  margin-left:auto;
+  color:#f3d46e;
+  background:rgba(243,200,91,.075);
+  border:1px solid rgba(243,200,91,.15);
+}
+.raid-card .player-card.admin-managed{
+  height:204px;
+  min-height:204px;
+  padding:13px 14px 12px;
+  border-color:rgba(243,200,91,.20);
+  background:
+    linear-gradient(145deg,rgba(30,29,43,.98),rgba(10,11,19,.99));
+}
+.raid-card .player-card.admin-managed .player-info-row{
+  margin-top:8px;
+  padding-top:0;
+}
+.raid-card .admin-profile-control{
+  margin-top:9px;
+  padding:8px 9px 9px;
+  border:1px solid rgba(243,200,91,.16);
+  border-radius:9px;
+  background:rgba(0,0,0,.16);
+}
+.raid-card .admin-profile-label{
+  display:block;
+  margin-bottom:5px;
+  color:#aeb6c5;
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+}
+.raid-card .player-card.admin-managed .admin-status-select{
+  display:block;
+  width:100%;
+  min-height:31px;
+  margin:0;
+  padding:5px 8px;
+  border-color:rgba(243,200,91,.24);
+  background:#0c1119;
+  color:#f1f2f7;
+  font-size:12px;
+  font-weight:700;
+}
+.raid-card .player-card.admin-managed .remove-player{
+  top:7px;
+  right:7px;
+  z-index:2;
+}
+@media(max-width:600px){
+  .raid-card .player-card.admin-managed{height:204px;min-height:204px}
+}
+</style>
+
 <style id="raid-event-meta-polish">
 /* Raid/Event-Infos: vertraute vertikale Darstellung, größer und sauber getrennt */
 .card-meta-clean{
@@ -4165,12 +4279,21 @@ function signupRoleSort(a,b){
 
 function renderSignupPlayerCard(p, removeHandler, removeLabel){
   const offspec=getPlayerOffspec(p);
+  const role=String(p?.role||"Keine Rolle");
+  const statusLabels={confirmed:"🟢 Dabei",bench:"🪑 Ersatzbank",uncertain:"❓ Unsicher",absent:"🚫 Abwesend"};
+  const currentStatus=p.status||"confirmed";
   return `<div class="player-card${isAdmin?" admin-managed":""}">
-    <strong>${escapeHTML(p.player)}</strong>
-    <small>👤 ${escapeHTML(p.character)}</small>
-    <small>${escapeHTML(p.class_name||"")} · ${escapeHTML(p.spec||"")}${offspec?` · ${escapeHTML(offspec)}`:""}</small>
-    ${playerRoleMarkup(p)}
-    ${adminStatusControl(p)}
+    <div class="player-card-top">
+      <strong>${escapeHTML(p.player)}</strong>
+      ${isAdmin?`<span class="admin-profile-badge">ADMIN</span>`:""}
+    </div>
+    <small class="player-character">👤 ${escapeHTML(p.character)}</small>
+    <small class="player-spec">${escapeHTML(p.class_name||"")} · ${escapeHTML(p.spec||"")}${offspec?` · ${escapeHTML(offspec)}`:""}</small>
+    <div class="player-info-row">
+      <span class="player-role-chip ${roleIconClass(role)}">${roleIcon(role)} ${escapeHTML(role)}</span>
+      <span class="player-gs-chip">GS ${escapeHTML(String(getPlayerItemLevel(p)??"–"))}</span>
+    </div>
+    ${isAdmin?`<div class="admin-profile-control"><span class="admin-profile-label">Status</span>${adminStatusControl(p)}</div>`:""}
     ${isAdmin?`<button class="remove-player" title="${escapeHTML(removeLabel||"Anmeldung als Admin entfernen")}" onclick="${removeHandler}">🗑️</button>`:""}
   </div>`;
 }
@@ -5896,5 +6019,57 @@ document.addEventListener('DOMContentLoaded',()=>{
 }
 @media(max-width:700px){
   .raid-card > .card-header > div:first-child{width:100% !important;}
+}
+</style>
+
+<style id="registered-player-info-vertical-final">
+/* Angemeldete Spieler: Informationen wieder sauber untereinander wie in der normalen Ansicht */
+.raid-card .player-card .player-info-row{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:flex-start;
+  gap:2px;
+  margin-top:auto;
+  padding-top:7px;
+}
+.raid-card .player-card .player-role-chip,
+.raid-card .player-card .player-gs-chip{
+  display:flex;
+  width:auto;
+  min-height:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  margin:0;
+  font-size:12px;
+  line-height:18px;
+  font-weight:600;
+}
+.raid-card .player-card .player-role-chip.tank{color:#b8d9ff}
+.raid-card .player-card .player-role-chip.heal{color:#8de7ae}
+.raid-card .player-card .player-role-chip.dd{color:#ffb0b0}
+.raid-card .player-card .player-gs-chip{
+  color:#f3d46e;
+  font-weight:700;
+}
+/* Im Admin-Modus bleibt alles untereinander und die Box wächst dafür mit */
+.raid-card .player-card.admin-managed{
+  height:218px;
+  min-height:218px;
+}
+.raid-card .player-card.admin-managed .player-info-row{
+  margin-top:auto;
+  padding-top:7px;
+}
+.raid-card .player-card.admin-managed .admin-profile-control{
+  margin-top:8px;
+}
+@media(max-width:600px){
+  .raid-card .player-card.admin-managed{
+    height:218px;
+    min-height:218px;
+  }
 }
 </style>
