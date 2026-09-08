@@ -3361,6 +3361,29 @@ main > .raid-list-promo.raid-list-promo-wide{
 }
 </style>
 
+<style id="admin-status-card-fix">
+/* Admin-Statusauswahl in Teilnehmerkarten sichtbar halten */
+.raid-card .player-card.admin-managed .player-role-line{
+  margin-top:4px;
+  padding-top:4px;
+}
+.raid-card .player-card.admin-managed .player-gs{
+  margin-top:3px;
+}
+.raid-card .player-card.admin-managed .admin-status-select{
+  flex:0 0 auto;
+  width:100%;
+  min-height:28px;
+  margin-top:5px;
+  padding:4px 7px;
+  font-size:11px;
+  line-height:1.2;
+}
+@media(max-width:600px){
+  .raid-card .player-card.admin-managed{height:178px;min-height:178px}
+}
+</style>
+
 <style id="raid-event-meta-polish">
 /* Raid/Event-Infos: vertraute vertikale Darstellung, größer und sauber getrennt */
 .card-meta-clean{
@@ -4142,7 +4165,7 @@ function signupRoleSort(a,b){
 
 function renderSignupPlayerCard(p, removeHandler, removeLabel){
   const offspec=getPlayerOffspec(p);
-  return `<div class="player-card">
+  return `<div class="player-card${isAdmin?" admin-managed":""}">
     <strong>${escapeHTML(p.player)}</strong>
     <small>👤 ${escapeHTML(p.character)}</small>
     <small>${escapeHTML(p.class_name||"")} · ${escapeHTML(p.spec||"")}${offspec?` · ${escapeHTML(offspec)}`:""}</small>
@@ -5563,6 +5586,18 @@ document.addEventListener('DOMContentLoaded',()=>{
   border-radius:12px;
   box-shadow:0 7px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.035);
 }
+.raid-card .player-card:has(.admin-status-select){
+  height:205px;
+  min-height:205px;
+}
+.raid-card .player-card:has(.admin-status-select) .player-role-line{
+  margin-top:8px;
+}
+.raid-card .player-card:has(.admin-status-select) .admin-status-select{
+  flex:0 0 auto;
+  margin-top:8px;
+}
+
 .raid-card .player-card:hover{
   transform:translateY(-2px);
   border-color:rgba(243,200,91,.28);
