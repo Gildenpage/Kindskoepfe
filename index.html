@@ -3501,39 +3501,53 @@ main > .raid-list-promo.raid-list-promo-wide{
 <style id="raid-event-meta-polish">
 /* Raid/Event-Infos: vertraute vertikale Darstellung, größer und sauber getrennt */
 .card-meta-clean{
-  margin-top:14px;
+  margin-top:15px;
   width:min(430px,100%);
-  font-size:1.02rem;
+  font-size:14px;
   color:var(--muted);
 }
 .card-meta-clean .card-meta-row{
   display:grid;
   grid-template-columns:30px 88px minmax(0,1fr);
   align-items:center;
-  gap:8px;
-  min-height:38px;
-  padding:5px 0;
+  gap:9px;
+  min-height:42px;
+  padding:7px 0 9px;
+  box-sizing:border-box;
   border-bottom:1px solid rgba(255,215,110,.16);
 }
-.card-meta-clean .card-meta-row:last-child{border-bottom:0}
+.card-meta-clean .card-meta-row:last-child{
+  border-bottom:0;
+  padding-bottom:7px;
+}
 .card-meta-clean .card-meta-icon{
   width:30px;
   text-align:center;
-  font-size:1.08rem;
+  font-size:1.05rem;
+  line-height:1;
 }
 .card-meta-clean .card-meta-row>span:nth-child(2){
   font-weight:600;
   color:#b9bdca;
+  line-height:1.25;
 }
 .card-meta-clean .card-meta-row strong{
   color:#e4e5eb;
-  font-size:1.03rem;
+  font-size:14px;
   font-weight:600;
+  line-height:1.25;
 }
 @media(max-width:600px){
-  .card-meta-clean{font-size:.98rem;width:100%}
-  .card-meta-clean .card-meta-row{grid-template-columns:28px 78px minmax(0,1fr);min-height:36px}
-  .card-meta-clean .card-meta-row strong{font-size:1rem}
+  .card-meta-clean{
+    font-size:13px;
+    width:100%;
+  }
+  .card-meta-clean .card-meta-row{
+    grid-template-columns:28px 78px minmax(0,1fr);
+    min-height:40px;
+    padding:6px 0 8px;
+  }
+  .card-meta-clean .card-meta-row strong{font-size:13px}
 }
 </style>
 </head>
@@ -3639,6 +3653,10 @@ function initSupabase(){
 }
 function escapeHTML(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function formatDate(date){const d=new Date(date+"T12:00:00");return Number.isNaN(d.getTime())?date:d.toLocaleDateString("de-DE",{weekday:"long",day:"2-digit",month:"2-digit",year:"numeric"});}
+function formatDisplayTime(time){
+  const value=String(time??"").trim();
+  return value.slice(0,5);
+}
 function getStartDate(item){
     if(!item || !item.date) return new Date(NaN);
 
@@ -4277,6 +4295,25 @@ function signupRoleSort(a,b){
   return (order[String(a?.role||"")]??99)-(order[String(b?.role||"")]??99);
 }
 
+
+function renderFreeRoleSlots(count, openTanks=0, openHeals=0){
+  const roles=[
+    ...Array(Math.max(0,openTanks)).fill(["tank","🛡️"]),
+    ...Array(Math.max(0,openHeals)).fill(["heal","💚"])
+  ];
+  // Übrige freie Plätze bleiben neutral, bekommen aber ein sehr dezentes DD-Symbol.
+  while(roles.length<count) roles.push(["dd","⚔️"]);
+
+  return roles.slice(0,count).map(([role,icon])=>`
+    <div class="player-card">
+      <span class="empty-slot ${role}-slot">
+        <span class="free-slot-watermark" aria-hidden="true">${icon}</span>
+        <span class="free-slot-label">Freier Platz</span>
+      </span>
+    </div>
+  `).join("");
+}
+
 function renderSignupPlayerCard(p, removeHandler, removeLabel){
   const offspec=getPlayerOffspec(p);
   const role=String(p?.role||"Keine Rolle");
@@ -4327,15 +4364,17 @@ function renderRaids(){
    const pct=Math.min(100,confirmed.length/r.size*100);
 
    const cardPlayer=p=>renderSignupPlayerCard(p,`removeRaidPlayer(${r.id},${p.id})`);
+   const openTanks=Math.max(0,Number(r.tank_limit||0)-tanks);
+   const openHeals=Math.max(0,Number(r.heal_limit||0)-heals);
    const ph=confirmed.map(cardPlayer).join("")+
-     Array.from({length:Math.max(0,r.size-confirmed.length)},()=>'<div class="player-card"><span class="empty-slot">Freier Platz</span></div>').join("");
+     renderFreeRoleSlots(free,openTanks,openHeals);
 
    const benchCards=bench.length
      ? `<div class="player-grid status-player-grid">${bench.map(cardPlayer).join("")}</div>`
      : '<span class="muted">Keine Einträge</span>';
 
    const statusList=(arr)=>arr.length
-     ? arr.map(p=>renderStatusPlayerCompact(p,`removeRaidPlayer(${r.id},${p.id})`)).join("")
+     ? `<div class="player-grid status-player-grid">${arr.map(cardPlayer).join("")}</div>`
      : '<span class="muted">Keine Einträge</span>';
 
    c.insertAdjacentHTML("beforeend",`<article class="raid-card">
@@ -4345,7 +4384,7 @@ function renderRaids(){
          <div class="card-meta card-meta-clean">
            <div class="card-meta-row"><span class="card-meta-icon">👥</span><span>Teilnehmer</span><strong>${r.size}</strong></div>
            <div class="card-meta-row"><span class="card-meta-icon">📅</span><span>Datum</span><strong>${formatDate(r.date)}</strong></div>
-           <div class="card-meta-row"><span class="card-meta-icon">🕐</span><span>Uhrzeit</span><strong>${escapeHTML(r.time)} Uhr</strong></div>
+           <div class="card-meta-row"><span class="card-meta-icon">🕐</span><span>Uhrzeit</span><strong>${escapeHTML(formatDisplayTime(r.time))} Uhr</strong></div>
          </div>
        </div>
        ${isAdmin?`<div class="card-admin-actions"><button class="btn btn-secondary btn-small" onclick="openRaidForm(${r.id})">✏️ Bearbeiten</button> <button class="btn btn-danger btn-small" onclick="deleteRaid(${r.id})">🗑️ Löschen</button></div>`:""}
@@ -4470,16 +4509,18 @@ function renderEvents(){
    const pct=Math.min(100,confirmed.length/e.max*100);
 
    const cardPlayer=p=>renderSignupPlayerCard(p,`removeEventPlayer(${e.id},${p.id})`);
+   const openTanks=Math.max(0,Number(e.tank_limit||0)-tanks);
+   const openHeals=Math.max(0,Number(e.heal_limit||0)-heals);
    const ph=confirmed.map(cardPlayer).join("")+
-     Array.from({length:Math.max(0,e.max-confirmed.length)},()=>'<div class="player-card"><span class="empty-slot">Freier Platz</span></div>').join("");
+     renderFreeRoleSlots(free,openTanks,openHeals);
 
    const benchCards=bench.length
      ? `<div class="player-grid status-player-grid">${bench.map(cardPlayer).join("")}</div>`
      : '<span class="muted">Keine Einträge</span>';
 
    const statusList=(arr)=>arr.length
-     ? arr.map(p=>renderStatusPlayerCompact(p,`removeEventPlayer(${e.id},${p.id})`)).join("")
-     : '<span class="muted">Keine Einträge</span>';
+      ? `<div class="player-grid status-player-grid">${arr.map(p=>renderSignupPlayerCard(p,`removeEventPlayer(${e.id},${p.id})`)).join("")}</div>`
+      : '<span class="muted">Keine Einträge</span>';
 
    c.insertAdjacentHTML("beforeend",`<article class="event-card">
      <div class="card-header">
@@ -4488,7 +4529,7 @@ function renderEvents(){
          <div class="card-meta card-meta-clean">
            <div class="card-meta-row"><span class="card-meta-icon">🏷️</span><span>Art</span><strong>${escapeHTML(e.type)}</strong></div>
            <div class="card-meta-row"><span class="card-meta-icon">📅</span><span>Datum</span><strong>${formatDate(e.date)}</strong></div>
-           <div class="card-meta-row"><span class="card-meta-icon">🕐</span><span>Uhrzeit</span><strong>${escapeHTML(e.time)} Uhr</strong></div>
+           <div class="card-meta-row"><span class="card-meta-icon">🕐</span><span>Uhrzeit</span><strong>${escapeHTML(formatDisplayTime(e.time))} Uhr</strong></div>
          </div>
        </div>
        ${isAdmin?`<div class="card-admin-actions"><button class="btn btn-secondary btn-small" onclick="openEventForm(${e.id})">✏️ Bearbeiten</button> <button class="btn btn-danger btn-small" onclick="deleteEvent(${e.id})">🗑️ Löschen</button></div>`:""}
@@ -6054,22 +6095,92 @@ document.addEventListener('DOMContentLoaded',()=>{
   color:#f3d46e;
   font-weight:700;
 }
-/* Im Admin-Modus bleibt alles untereinander und die Box wächst dafür mit */
+/* Admin-Status: genug Platz für Label + Auswahl, ohne Überlappung */
 .raid-card .player-card.admin-managed{
-  height:218px;
-  min-height:218px;
+  height:236px;
+  min-height:236px;
 }
 .raid-card .player-card.admin-managed .player-info-row{
-  margin-top:auto;
+  margin-top:8px;
   padding-top:7px;
 }
 .raid-card .player-card.admin-managed .admin-profile-control{
   margin-top:8px;
+  flex:0 0 auto;
+}
+.raid-card .player-card.admin-managed .admin-profile-label{
+  margin-bottom:6px;
+}
+.raid-card .player-card.admin-managed .admin-status-select{
+  min-height:32px;
+  box-sizing:border-box;
 }
 @media(max-width:600px){
   .raid-card .player-card.admin-managed{
-    height:218px;
-    min-height:218px;
+    height:236px;
+    min-height:236px;
   }
+}
+</style>
+
+
+<style id="free-slot-role-watermarks">
+/* Sehr dezente Rollen-Wasserzeichen in freien Plätzen */
+.raid-card .empty-slot{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.raid-card .empty-slot .free-slot-watermark{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  z-index:-1;
+  pointer-events:none;
+  font-size:58px;
+  line-height:1;
+  opacity:.075;
+  filter:saturate(.8);
+}
+.raid-card .empty-slot.tank-slot .free-slot-watermark{
+  color:#9fc7ff;
+}
+.raid-card .empty-slot.heal-slot .free-slot-watermark{
+  color:#7ee3a4;
+}
+.raid-card .empty-slot.dd-slot .free-slot-watermark{
+  color:#d8a4a4;
+  opacity:.04;
+}
+.raid-card .empty-slot .free-slot-label{
+  position:relative;
+  z-index:1;
+  color:#697386;
+  font-size:14px;
+}
+@media(max-width:600px){
+  .raid-card .empty-slot .free-slot-watermark{font-size:50px}
+}
+</style>
+
+
+<style id="status-groups-uniform-player-cards">
+/* Unsicher und Abwesend funktionieren wie die Ersatzbank:
+   vollständige Spielerkarten statt kompakter Zeilen. */
+.raid-card .status-player-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin-top:0;
+}
+.raid-card .status-player-grid .player-card{
+  height:150px;
+  min-height:150px;
+  box-sizing:border-box;
+}
+.raid-card .status-player-grid .player-card.admin-managed{
+  height:236px;
+  min-height:236px;
 }
 </style>
