@@ -4989,10 +4989,14 @@ async function saveOffgameSignup(id){
     p_item_type:"event",
     p_item_id:id,
     p_player:player,
-    p_character:"",
-    p_class_name:"",
-    p_spec:"",
-    p_role:null,
+    // Die bestehende Supabase-RPC verlangt Spieler, Charakter, Klasse und Spec.
+    // Bei Offgameevents werden diese technischen Werte nur intern gespeichert und
+    // in der Anzeige vollständig ausgeblendet. Für die Platzprüfung nutzen wir DD
+    // als technische Sammelrolle, deren Limit dem Gesamtlimit entspricht.
+    p_character:player,
+    p_class_name:"Offgame",
+    p_spec:"Offgame",
+    p_role:"DD",
     p_status:"confirmed",
     p_pin:logged.pin
   });
