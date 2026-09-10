@@ -4632,9 +4632,12 @@ async function saveEvent(id){
    date:document.getElementById("eventDate").value,
    time:document.getElementById("eventTime").value,
    max,
-   tank_limit:offgame?0:+document.getElementById("eventTank").value,
-   heal_limit:offgame?0:+document.getElementById("eventHeal").value,
-   dd_limit:offgame?0:+document.getElementById("eventDD").value,
+   // Offgameevents haben keine sichtbaren Rollenlimits. Intern setzen wir jede Rollen-Grenze
+   // auf die maximale Teilnehmerzahl, damit die bestehende Raidprofil-Anmeldung keinen
+   // Rollenplatz ablehnt. Die Gesamtzahl wird weiterhin über max begrenzt.
+   tank_limit:offgame?max:+document.getElementById("eventTank").value,
+   heal_limit:offgame?max:+document.getElementById("eventHeal").value,
+   dd_limit:offgame?max:+document.getElementById("eventDD").value,
    description:document.getElementById("eventDescription").value.trim(),
    offgame_event:offgame
  };
@@ -4993,15 +4996,15 @@ async function saveOffgameSignup(id){
   let result=await submit(status);
   if(!result)return;
 
-  if(result.ok===false && result.needs_bench){
-    const ok=confirm((result.message||"Für dieses Event ist kein fester Platz mehr frei.")+"\n\nMöchtest du stattdessen auf die Ersatzbank?");
-    if(!ok){showToast("Anmeldung nicht gespeichert.");return;}
-    result=await submit("bench");
-    if(!result)return;
-  }
-
+  // Offgameevents sollen niemals wegen einer Rolle auf die Ersatzbank verweisen.
+  // Die Rollenlimits werden beim Speichern des Offgameevents intern auf die
+  // maximale Teilnehmerzahl gesetzt. Damit entscheidet nur die Gesamtzahl der Plätze.
   if(result.ok===false){
-    alert(result.message||"Anmeldung konnte nicht gespeichert werden.");
+    if(result.needs_bench){
+      alert("Dieses Offgameevent ist bereits voll. Es sind keine freien Teilnehmerplätze mehr vorhanden.");
+    }else{
+      alert(result.message||"Anmeldung konnte nicht gespeichert werden.");
+    }
     return;
   }
 
