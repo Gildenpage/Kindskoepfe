@@ -4632,12 +4632,12 @@ async function saveEvent(id){
    date:document.getElementById("eventDate").value,
    time:document.getElementById("eventTime").value,
    max,
-   // Offgameevents haben keine sichtbaren Rollenlimits. Intern setzen wir jede Rollen-Grenze
-   // auf die maximale Teilnehmerzahl, damit die bestehende Raidprofil-Anmeldung keinen
-   // Rollenplatz ablehnt. Die Gesamtzahl wird weiterhin über max begrenzt.
-   tank_limit:offgame?max:+document.getElementById("eventTank").value,
-   heal_limit:offgame?max:+document.getElementById("eventHeal").value,
-   dd_limit:offgame?max:+document.getElementById("eventDD").value,
+   // Offgameevents haben keine Rollenlimits. Intern bleiben die drei Limits auf 0,
+   // damit die Datenbank-Prüfung (Rollenlimits <= maximale Teilnehmerzahl) erfüllt ist.
+   // Die Teilnehmerzahl wird ausschließlich über max begrenzt.
+   tank_limit:offgame?0:+document.getElementById("eventTank").value,
+   heal_limit:offgame?0:+document.getElementById("eventHeal").value,
+   dd_limit:offgame?0:+document.getElementById("eventDD").value,
    description:document.getElementById("eventDescription").value.trim(),
    offgame_event:offgame
  };
