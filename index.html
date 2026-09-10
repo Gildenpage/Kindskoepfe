@@ -3398,6 +3398,22 @@ main > .raid-list-promo.raid-list-promo-wide{
 /* Gleichmäßige Teilnehmerkarten – passend zum bestehenden Dark/Gold-Style */
 .player-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));align-items:stretch}
 .player-grid>.player-card{height:150px;min-height:150px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start}
+/* Offgameevents: nur der Spielername wird angezeigt. */
+.offgame-event .offgame-player-card{
+  justify-content:center;
+}
+.offgame-event .offgame-player-card .player-card-top strong{
+  font-size:16px;
+  text-align:center;
+}
+.offgame-event .offgame-player-card .admin-profile-control{
+  margin-top:10px;
+}
+.offgame-event .offgame-empty-card .empty-slot{
+  align-items:center;
+  justify-content:center;
+}
+
 .player-grid>.player-card strong{min-height:22px}
 .player-grid>.player-card .player-role-line{margin-top:4px}
 .player-grid>.player-card .player-gs{margin-top:auto}
@@ -3605,6 +3621,15 @@ main > .raid-list-promo.raid-list-promo-wide{
 }
 </style>
 
+<style id="offgame-event-style">
+.offgame-signup-note{display:flex;flex-direction:column;gap:5px;margin:18px 0;padding:14px 16px;border:1px solid rgba(216,173,75,.28);border-left:4px solid var(--gold);border-radius:8px;background:rgba(216,173,75,.06)}
+.offgame-signup-note strong{color:var(--gold2)} .offgame-signup-note span{color:#b9c6d0;font-size:13px;line-height:1.5}
+.offgame-event .player-card{min-height:100px;height:100px}
+.offgame-event .player-card .player-character,.offgame-event .player-card .player-spec,.offgame-event .player-card .player-info-row{display:none!important}
+.offgame-event .player-card>strong{margin:0!important;min-height:0!important;font-size:16px}
+.offgame-event .player-card .player-card-top{height:100%;display:flex;align-items:center}
+.offgame-event .player-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+</style>
 <style id="eventplaner-raid-player-style-copy">
 /* Eventplaner: Teilnehmerkarten, freie Plätze/Wasserzeichen und Statusbereiche exakt im Raidplaner-Stil */
 .event-card .player-card:has(.admin-status-select){height:205px;min-height:205px}
@@ -4280,8 +4305,9 @@ function selectManagedSignup(index){
 function openManagedSignupActions(type,id,player,character,pin,signup){
   const labels={confirmed:"Dabei",bench:"Ersatzbank",uncertain:"Unsicher",absent:"Abwesend"};
   const item=type==="raid"?raids.find(x=>x.id===id):events.find(x=>x.id===id);
+  const offgame=type==="event" && !!item?.offgame_event;
   openModal(`<h2>🔑 Anmeldung gefunden</h2>
-  <div class="news-card" style="margin-bottom:15px"><strong>${escapeHTML(player)}</strong> · ${escapeHTML(character)}<br><span class="muted">${escapeHTML(item?.name||"")}</span><br><br>Aktueller Status: <strong>${labels[signup.status]||signup.status}</strong></div>
+  <div class="news-card" style="margin-bottom:15px"><strong>${escapeHTML(player)}</strong>${offgame?"":" · "+escapeHTML(character||"")}<br><span class="muted">${escapeHTML(item?.name||"")}</span>${offgame?'<br><br><span class="muted">🌐 Offgameevent – nur Spielerprofil/Spielername</span>':""}<br><br>Aktueller Status: <strong>${labels[signup.status]||signup.status}</strong></div>
   <p class="muted">Was möchtest du ändern?</p>
   <div class="modal-actions" style="justify-content:flex-start">
     <button class="btn btn-green" onclick="manageOwnSignup('${type}',${id},'${escapeJS(player)}','${escapeJS(character)}','${escapeJS(pin)}','confirmed')">✅ Dabei</button>
@@ -4430,6 +4456,28 @@ function renderFreeRoleSlots(count, openTanks=0, openHeals=0){
   `).join("");
 }
 
+function renderFreeOffgameSlots(count){
+  return Array(Math.max(0,count)).fill(0).map(()=>`
+    <div class="player-card offgame-player-card offgame-empty-card">
+      <span class="empty-slot dd-slot">
+        <span class="free-slot-watermark" aria-hidden="true">🌐</span>
+        <span class="free-slot-label">Freier Platz</span>
+      </span>
+    </div>
+  `).join("");
+}
+
+function renderOffgamePlayerCard(p, removeHandler, removeLabel){
+  return `<div class="player-card offgame-player-card${isAdmin?" admin-managed":""}">
+    <div class="player-card-top">
+      <strong>👤 ${escapeHTML(p.player)}</strong>
+      ${isAdmin?`<span class="admin-profile-badge">ADMIN</span>`:""}
+    </div>
+    ${isAdmin?`<div class="admin-profile-control"><span class="admin-profile-label">Status</span>${adminStatusControl(p)}</div>`:""}
+    ${isAdmin?`<button class="remove-player" title="${escapeHTML(removeLabel||"Anmeldung als Admin entfernen")}" onclick="${removeHandler}">🗑️</button>`:""}
+  </div>`;
+}
+
 function renderSignupPlayerCard(p, removeHandler, removeLabel){
   const offspec=getPlayerOffspec(p);
   const role=String(p?.role||"Keine Rolle");
@@ -4543,11 +4591,63 @@ function renderRaids(){
 
 /* ===== EVENTS ===== */
 function openEventForm(id=null){
- if(!isAdmin){alert("Nur der Admin kann Events erstellen.");return;}const e=id===null?null:events.find(x=>x.id===id);if(id!==null&&!e)return;openModal(`<h2>🎉 ${e?"Event bearbeiten":"Event erstellen"}</h2><div class="form-group"><label>Eventname *</label><input id="eventName" value="${e?escapeHTML(e.name):""}"></div><div class="form-group"><label>Art</label><input id="eventType" value="${e?escapeHTML(e.type):"Gildenevent"}"></div><div class="form-row"><div class="form-group"><label>Datum *</label><input type="date" id="eventDate" value="${e?.date||""}"></div><div class="form-group"><label>Startzeit *</label><input type="time" id="eventTime" value="${e?.time||"20:00"}"></div></div><div class="form-group"><label>Maximale Teilnehmer *</label><input type="number" id="eventMax" min="1" max="100" value="${e?.max||10}"></div><div class="role-limit-form"><div><label>🛡️ Tanks</label><input type="number" id="eventTank" min="0" value="${e?.tank_limit??2}"></div><div><label>💚 Heiler</label><input type="number" id="eventHeal" min="0" value="${e?.heal_limit??3}"></div><div><label>⚔️ DDs</label><input type="number" id="eventDD" min="0" value="${e?.dd_limit??5}"></div></div><div class="form-group"><label>Beschreibung</label><textarea id="eventDescription">${e?escapeHTML(e.description):""}</textarea></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveEvent(${id===null?"null":id})">💾 Event speichern</button></div>`);
+ if(!isAdmin){alert("Nur der Admin kann Events erstellen.");return;}
+ const e=id===null?null:events.find(x=>x.id===id);
+ if(id!==null&&!e)return;
+ const offgame=!!e?.offgame_event;
+ openModal(`<h2>🎉 ${e?"Event bearbeiten":"Event erstellen"}</h2>
+   <div class="form-group"><label>Eventname *</label><input id="eventName" value="${e?escapeHTML(e.name):""}"></div>
+   <div class="form-group"><label>Art</label><input id="eventType" value="${e?escapeHTML(e.type):(offgame?"Offgameevent":"Gildenevent")}"></div>
+   <div class="form-group">
+     <label style="display:flex;align-items:center;gap:9px;cursor:pointer">
+       <input type="checkbox" id="eventOffgame" ${offgame?"checked":""} onchange="toggleOffgameEventForm()" style="width:auto">
+       🌐 Offgameevent – Anmeldung nur mit Spielerprofil/Spielername
+     </label>
+     <p class="signup-status-help">Für ein Offgameevent werden Klasse, Spec, Offspec, GS und Rolle nicht benötigt. Die Anmeldung läuft ausschließlich über ein bestehendes Spielerprofil.</p>
+   </div>
+   <div class="form-row"><div class="form-group"><label>Datum *</label><input type="date" id="eventDate" value="${e?.date||""}"></div><div class="form-group"><label>Startzeit *</label><input type="time" id="eventTime" value="${e?.time||"20:00"}"></div></div>
+   <div class="form-group"><label>Maximale Teilnehmer *</label><input type="number" id="eventMax" min="1" max="100" value="${e?.max||10}"></div>
+   <div id="eventRoleLimits" class="role-limit-form">
+     <div><label>🛡️ Tanks</label><input type="number" id="eventTank" min="0" value="${e?.tank_limit??2}"></div>
+     <div><label>💚 Heiler</label><input type="number" id="eventHeal" min="0" value="${e?.heal_limit??3}"></div>
+     <div><label>⚔️ DDs</label><input type="number" id="eventDD" min="0" value="${e?.dd_limit??5}"></div>
+   </div>
+   <div class="form-group"><label>Beschreibung</label><textarea id="eventDescription">${e?escapeHTML(e.description):""}</textarea></div>
+   <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveEvent(${id===null?"null":id})">💾 Event speichern</button></div>`);
+ toggleOffgameEventForm();
 }
-async function saveEvent(id){ if(!isAdmin){alert("Admin-Sitzung ist nicht mehr aktiv. Bitte neu einloggen.");return;}
- const payload={name:document.getElementById("eventName").value.trim(),type:document.getElementById("eventType").value.trim()||"Event",date:document.getElementById("eventDate").value,time:document.getElementById("eventTime").value,max:+document.getElementById("eventMax").value,tank_limit:+document.getElementById("eventTank").value,heal_limit:+document.getElementById("eventHeal").value,dd_limit:+document.getElementById("eventDD").value,description:document.getElementById("eventDescription").value.trim()};if(!payload.name||!payload.date||!payload.time||payload.max<1){alert("Bitte Name, Datum, Uhrzeit und Teilnehmerzahl ausfüllen.");return;}if(payload.tank_limit+payload.heal_limit+payload.dd_limit>payload.max){alert("Die Rollenlimits dürfen die maximale Teilnehmerzahl nicht überschreiten.");return;}if(id!==null){const e=events.find(x=>x.id===id);if(e&&e.players.length>payload.max){alert("Maximale Teilnehmerzahl ist kleiner als bereits angemeldete Spieler.");return;}}
- const q=id===null?supabaseClient.from("events").insert(payload):supabaseClient.from("events").update(payload).eq("id",id);const {error}=await q;if(error){dbError(error);return;}closeModal();await refreshData();showToast(id===null?"🎉 Event erstellt.":"🎉 Event aktualisiert.");
+function toggleOffgameEventForm(){
+ const cb=document.getElementById("eventOffgame"),wrap=document.getElementById("eventRoleLimits");
+ if(!cb||!wrap)return;
+ const offgame=cb.checked;
+ wrap.style.display=offgame?"none":"grid";
+}
+async function saveEvent(id){
+ if(!isAdmin){alert("Admin-Sitzung ist nicht mehr aktiv. Bitte neu einloggen.");return;}
+ const offgame=!!document.getElementById("eventOffgame")?.checked;
+ const max=+document.getElementById("eventMax").value;
+ const payload={
+   name:document.getElementById("eventName").value.trim(),
+   type:document.getElementById("eventType").value.trim()||(offgame?"Offgameevent":"Event"),
+   date:document.getElementById("eventDate").value,
+   time:document.getElementById("eventTime").value,
+   max,
+   tank_limit:offgame?0:+document.getElementById("eventTank").value,
+   heal_limit:offgame?0:+document.getElementById("eventHeal").value,
+   dd_limit:offgame?0:+document.getElementById("eventDD").value,
+   description:document.getElementById("eventDescription").value.trim(),
+   offgame_event:offgame
+ };
+ if(!payload.name||!payload.date||!payload.time||payload.max<1){alert("Bitte Name, Datum, Uhrzeit und Teilnehmerzahl ausfüllen.");return;}
+ if(!offgame && payload.tank_limit+payload.heal_limit+payload.dd_limit>payload.max){alert("Die Rollenlimits dürfen die maximale Teilnehmerzahl nicht überschreiten.");return;}
+ if(id!==null){
+   const e=events.find(x=>x.id===id);
+   if(e&&e.players.length>payload.max){alert("Maximale Teilnehmerzahl ist kleiner als bereits angemeldete Spieler.");return;}
+ }
+ const q=id===null?supabaseClient.from("events").insert(payload):supabaseClient.from("events").update(payload).eq("id",id);
+ const {error}=await q;
+ if(error){dbError(error);return;}
+ closeModal();await refreshData();showToast(id===null?(offgame?"🌐 Offgameevent erstellt.":"🎉 Event erstellt."):(offgame?"🌐 Offgameevent aktualisiert.":"🎉 Event aktualisiert."));
 }
 async function deleteEvent(id){
  if(!isAdmin)return;
@@ -4609,7 +4709,8 @@ function renderEvents(){
  }
  events.slice().sort((a,b)=>getStartDate(a)-getStartDate(b)).forEach(e=>{
    e.players=e.players||[];
-   const confirmed=e.players.filter(p=>(p.status||"confirmed")==="confirmed").sort(signupRoleSort);
+   const offgame=!!e.offgame_event;
+   const confirmed=e.players.filter(p=>(p.status||"confirmed")==="confirmed").sort(offgame?((a,b)=>String(a?.player||"").localeCompare(String(b?.player||""),undefined,{sensitivity:"base"})):signupRoleSort);
    const bench=e.players.filter(p=>p.status==="bench");
    const uncertain=e.players.filter(p=>p.status==="uncertain");
    const absent=e.players.filter(p=>p.status==="absent");
@@ -4618,25 +4719,28 @@ function renderEvents(){
    const dds=confirmed.filter(p=>p.role==="DD").length;
    const free=Math.max(0,e.max-confirmed.length);
    const pct=Math.min(100,confirmed.length/e.max*100);
-
-   const cardPlayer=p=>renderSignupPlayerCard(p,`removeEventPlayer(${e.id},${p.id})`);
+   const cardPlayer=p=>offgame
+     ? renderOffgamePlayerCard(p,`removeEventPlayer(${e.id},${p.id})`)
+     : renderSignupPlayerCard(p,`removeEventPlayer(${e.id},${p.id})`);
    const openTanks=Math.max(0,Number(e.tank_limit||0)-tanks);
    const openHeals=Math.max(0,Number(e.heal_limit||0)-heals);
-   const ph=confirmed.map(cardPlayer).join("")+
-     renderFreeRoleSlots(free,openTanks,openHeals);
-
-   const benchCards=bench.length
-     ? `<div class="player-grid status-player-grid">${bench.map(cardPlayer).join("")}</div>`
-     : '<span class="muted">Keine Einträge</span>';
-
-   const statusList=(arr)=>arr.length
-     ? `<div class="player-grid status-player-grid">${arr.map(cardPlayer).join("")}</div>`
-     : '<span class="muted">Keine Einträge</span>';
-
-   c.insertAdjacentHTML("beforeend",`<article class="raid-card event-card-raid-style">
+   const ph=confirmed.map(cardPlayer).join("")+(offgame
+     ? renderFreeOffgameSlots(free)
+     : renderFreeRoleSlots(free,openTanks,openHeals));
+   const benchCards=bench.length?`<div class="player-grid status-player-grid">${bench.map(cardPlayer).join("")}</div>`:'<span class="muted">Keine Einträge</span>';
+   const statusList=(arr)=>arr.length?`<div class="player-grid status-player-grid">${arr.map(cardPlayer).join("")}</div>`:'<span class="muted">Keine Einträge</span>';
+   const requirementHtml=offgame
+     ? `<div class="offgame-signup-note"><strong>🌐 Offgameevent</strong><span>Anmeldung nur mit Spielerprofil / Spielernamen. Keine Klasse, Spec, Offspec, GS oder Rolle erforderlich.</span></div>`
+     : `<div class="requirements raid-role-summary">
+         <div class="requirement tank"><strong>${tanks}/${e.tank_limit}</strong>🛡️ Tanks</div>
+         <div class="requirement heal"><strong>${heals}/${e.heal_limit}</strong>💚 Heiler</div>
+         <div class="requirement dd"><strong>${dds}/${e.dd_limit}</strong>⚔️ DD´s</div>
+         <div class="requirement free"><strong>${free}</strong>👥 Frei</div>
+       </div>`;
+   c.insertAdjacentHTML("beforeend",`<article class="raid-card event-card${offgame?" offgame-event":""}">
      <div class="card-header">
        <div>
-         <div class="card-title">🎉 ${escapeHTML(e.name)}</div>
+         <div class="card-title">${offgame?"🌐":"🎉"} ${escapeHTML(e.name)}</div>
          <div class="card-meta card-meta-clean">
            <div class="card-meta-row"><span class="card-meta-icon">👥</span><span>Teilnehmer</span><strong>${e.max}</strong></div>
            <div class="card-meta-row"><span class="card-meta-icon">📅</span><span>Datum</span><strong>${formatDate(e.date)}</strong></div>
@@ -4648,34 +4752,23 @@ function renderEvents(){
      <div class="card-body">
        ${renderCountdown(e,true)}
        ${e.description?`<p class="card-description">${escapeHTML(e.description)}</p>`:""}
-       <div class="requirements raid-role-summary">
-         <div class="requirement tank"><strong>${tanks}/${e.tank_limit}</strong>🛡️ Tanks</div>
-         <div class="requirement heal"><strong>${heals}/${e.heal_limit}</strong>💚 Heiler</div>
-         <div class="requirement dd"><strong>${dds}/${e.dd_limit}</strong>⚔️ DD´s</div>
-         <div class="requirement free"><strong>${free}</strong>👥 Frei</div>
-       </div>
+       ${requirementHtml}
        <div class="progress-label"><span>Teilnehmer</span><span>${confirmed.length}/${e.max}</span></div>
        <div class="progress ${pct>=100?"progress-complete":""}"><div class="progress-bar" style="width:${pct}%"></div></div>
        <div class="player-grid">${ph}</div>
        <div class="status-groups">
-         <div class="status-group bench">
-           <h4>🪑 Ersatzbank (${bench.length})</h4>
-           ${benchCards}
-         </div>
-         <div class="status-group uncertain">
-           <h4>❓ Unsicher (${uncertain.length})</h4>
-           ${statusList(uncertain)}
-         </div>
-         <div class="status-group absent">
-           <h4>🚫 Abwesend (${absent.length})</h4>
-           ${statusList(absent)}
-         </div>
+         <div class="status-group bench"><h4>🪑 Ersatzbank (${bench.length})</h4>${benchCards}</div>
+         <div class="status-group uncertain"><h4>❓ Unsicher (${uncertain.length})</h4>${statusList(uncertain)}</div>
+         <div class="status-group absent"><h4>🚫 Abwesend (${absent.length})</h4>${statusList(absent)}</div>
        </div>
        <div class="signup-actions-row">
          <button class="btn btn-primary" onclick="openSignup('event',${e.id})">${getLoggedInRaidProfile() ? '➕ Anmeldung' : '+ Anmeldung'}</button>
          <button class="btn btn-secondary" onclick="openManageSignupChooserFor('event',${e.id})">${getLoggedInRaidProfile() ? '⚙️ Meine Anmeldung verwalten' : '🔑 Meine Anmeldung verwalten'}</button>
        </div>
-       <p class="signup-roster-hint">${getLoggedInRaidProfile() ? '<strong>Raidprofil aktiv:</strong> Deine Anmeldung wird automatisch deinem eingeloggten Profil zugeordnet – kein PIN nötig.' : '<strong>Hinweis:</strong> Du kannst dich erst für ein Event anmelden, wenn du dich im Raidkader eingetragen hast. Verwende dafür den PIN deines Raidkader-Profils.'}</p>
+       <p class="signup-roster-hint">${offgame
+         ? (getLoggedInRaidProfile() ? '<strong>Spielerprofil aktiv:</strong> Du meldest dich nur mit deinem Spielernamen an.' : '<strong>Hinweis:</strong> Für dieses Offgameevent benötigst du ein bestehendes Spielerprofil.')
+         : (getLoggedInRaidProfile() ? '<strong>Raidprofil aktiv:</strong> Deine Anmeldung wird automatisch deinem eingeloggten Profil zugeordnet – kein PIN nötig.' : '<strong>Hinweis:</strong> Du kannst dich erst für ein Event anmelden, wenn du dich im Raidkader eingetragen hast. Verwende dafür den PIN deines Raidkader-Profils.')}
+       </p>
      </div>
    </article>`);
  });
@@ -4814,6 +4907,21 @@ function openSignup(type,id){
   const item=type==="raid"?raids.find(x=>x.id===id):events.find(x=>x.id===id);
   if(!item)return;
 
+  if(type==="event" && item.offgame_event){
+    const logged=getLoggedInRaidProfile();
+    if(logged){ openOffgameSignupForm(id,logged); return; }
+    openModal(`<h2>🌐 Offgameevent-Anmeldung</h2>
+      <p class="muted">${escapeHTML(item.name)}</p>
+      <div class="rk-signup-context"><strong>👤 Anmeldung über dein Spielerprofil</strong><br>
+      <span class="muted">Für dieses Event reichen Spielerprofil und Spielername. Klasse, Spec, Offspec, GS, Rolle und Charakter werden nicht benötigt.</span></div>
+      <div class="form-group"><label>Spielerprofil-PIN *</label>
+      <input id="signupPin" inputmode="numeric" pattern="[0-9]{4,20}" maxlength="20" type="password" autocomplete="off" placeholder="4–20 Ziffern">
+      <p class="signup-status-help">Es muss bereits ein Spielerprofil mit diesem PIN existieren.</p></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="verifyOffgameSignupPin(${id})">Weiter</button></div>`);
+    return;
+  }
+
   const logged=getLoggedInRaidProfile();
   if(logged){
     raidSignupContext={type,id,pin:logged.pin,player:logged.player,characters:logged.characters};
@@ -4823,20 +4931,83 @@ function openSignup(type,id){
 
   openModal(`<h2>${type==="raid"?"⚔️ Raid-Anmeldung":"🎉 Event-Anmeldung"}</h2>
     <p class="muted">${escapeHTML(item.name)}</p>
-    <div class="rk-signup-context">
-      <strong>🔐 Anmeldung über dein Raidkader-Profil</strong><br>
-      <span class="muted">Verwende den PIN, den du bei der Erstellung deines Raidkader-Profils vergeben hast. Danach kannst du einen deiner dort eingetragenen Charaktere auswählen.</span>
-    </div>
-    <div class="form-group">
-      <label>Raidkader-PIN *</label>
-      <input id="signupPin" inputmode="numeric" pattern="[0-9]{4,20}" maxlength="20" type="password" autocomplete="off" placeholder="4–20 Ziffern">
-      <p class="signup-status-help">Du kannst dich nur mit einem bestehenden Raidkader-Profil anmelden.</p>
-    </div>
-    <p id="raidSignupNoProfileHint" class="signup-roster-hint"><strong>Noch kein Raidkader-Profil?</strong> Du kannst dich erst für ein Raid / Event anmelden, wenn du dich in den Raidkader eingetragen hast.</p>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
-      <button class="btn btn-primary" onclick="verifyRaidSignupPin('${type}',${id})">Weiter</button>
-    </div>`);
+    <div class="rk-signup-context"><strong>🔐 Anmeldung über dein Raidkader-Profil</strong><br>
+    <span class="muted">Verwende den PIN deines Raidkader-Profils. Danach kannst du einen dort eingetragenen Charakter auswählen.</span></div>
+    <div class="form-group"><label>Raidkader-PIN *</label>
+    <input id="signupPin" inputmode="numeric" pattern="[0-9]{4,20}" maxlength="20" type="password" autocomplete="off" placeholder="4–20 Ziffern">
+    <p class="signup-status-help">Du kannst dich nur mit einem bestehenden Raidkader-Profil anmelden.</p></div>
+    <p id="raidSignupNoProfileHint" class="signup-roster-hint"><strong>Noch kein Raidkader-Profil?</strong> Erstelle zuerst dein Profil.</p>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+    <button class="btn btn-primary" onclick="verifyRaidSignupPin('${type}',${id})">Weiter</button></div>`);
+}
+
+function openOffgameSignupForm(id,profile){
+  const item=events.find(x=>Number(x.id)===Number(id)); if(!item)return;
+  openModal(`<h2>🌐 Offgameevent-Anmeldung</h2>
+    <p class="muted">${escapeHTML(item.name)}</p>
+    <div class="news-card" style="margin-bottom:15px"><strong>👤 ${escapeHTML(profile.player)}</strong>
+      <div class="muted" style="margin-top:7px">Nur Spielername – ohne Charakter, Klasse, Spec, Offspec, GS oder Rolle.</div></div>
+    <div class="form-group"><label>Status *</label><select id="offgameSignupStatus">
+      <option value="confirmed">🟢 Dabei</option><option value="bench">🪑 Ersatzbank</option>
+      <option value="uncertain">❓ Unsicher</option><option value="absent">🚫 Abwesend</option></select></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+    <button class="btn btn-primary" onclick="saveOffgameSignup(${id})">💾 Anmeldung speichern</button></div>`);
+}
+
+async function verifyOffgameSignupPin(id){
+  const pin=normalizeName(document.getElementById("signupPin")?.value);
+  if(!pinIsValid(pin)){alert("Bitte deinen 4–20-stelligen Spielerprofil-PIN eingeben.");return;}
+  const {data,error}=await supabaseClient.rpc("get_raidkader_signup_context",{p_pin:pin});
+  if(error){dbError(error);return;}
+  if(!data?.ok){alert(data?.message||"Kein Spielerprofil mit diesem PIN gefunden.");return;}
+  saveRaidProfileSession({player:data.player_name,pin,characters:Array.isArray(data.characters)?data.characters:[]});
+  openOffgameSignupForm(id,{player:data.player_name,pin});
+}
+
+async function saveOffgameSignup(id){
+  const logged=getLoggedInRaidProfile();
+  if(!logged){alert("Bitte zuerst mit einem bestehenden Spielerprofil anmelden.");return;}
+
+  // Für Offgameevents verwenden wir das bestehende Raidprofil nur zur sicheren
+  // PIN-Prüfung. Die Charakterdaten werden auf der Offgame-Karte nicht angezeigt.
+  const character=Array.isArray(logged.characters)?logged.characters.find(c=>c?.id)||logged.characters[0]:null;
+  if(!character?.id){
+    alert("Zu deinem Spielerprofil wurde kein Charakter gefunden. Bitte prüfe dein Raidprofil.");
+    return;
+  }
+
+  const status=document.getElementById("offgameSignupStatus")?.value||"confirmed";
+
+  const submit=async(signupStatus)=>{
+    const {data,error}=await supabaseClient.rpc("register_signup_from_raidkader",{
+      p_item_type:"event",
+      p_item_id:id,
+      p_raidkader_id:character.id,
+      p_pin:logged.pin,
+      p_status:signupStatus
+    });
+    if(error){dbError(error);return null;}
+    return data||{ok:true};
+  };
+
+  let result=await submit(status);
+  if(!result)return;
+
+  if(result.ok===false && result.needs_bench){
+    const ok=confirm((result.message||"Für dieses Event ist kein fester Platz mehr frei.")+"\n\nMöchtest du stattdessen auf die Ersatzbank?");
+    if(!ok){showToast("Anmeldung nicht gespeichert.");return;}
+    result=await submit("bench");
+    if(!result)return;
+  }
+
+  if(result.ok===false){
+    alert(result.message||"Anmeldung konnte nicht gespeichert werden.");
+    return;
+  }
+
+  closeModal();
+  await refreshData();
+  showToast("🌐 Offgameevent-Anmeldung gespeichert.");
 }
 
 async function verifyRaidSignupPin(type,id){
