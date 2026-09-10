@@ -4307,7 +4307,7 @@ function openManagedSignupActions(type,id,player,character,pin,signup){
   const item=type==="raid"?raids.find(x=>x.id===id):events.find(x=>x.id===id);
   const offgame=type==="event" && !!item?.offgame_event;
   openModal(`<h2>🔑 Anmeldung gefunden</h2>
-  <div class="news-card" style="margin-bottom:15px"><strong>${escapeHTML(player)}</strong>${offgame?"":" · "+escapeHTML(character||"")}<br><span class="muted">${escapeHTML(item?.name||"")}</span>${offgame?'<br><br><span class="muted">🌐 Offgameevent – nur Spielerprofil/Spielername</span>':""}<br><br>Aktueller Status: <strong>${labels[signup.status]||signup.status}</strong></div>
+  <div class="news-card" style="margin-bottom:15px"><strong>${escapeHTML(player)}</strong>${offgame?"":" · "+escapeHTML(character||"")}<br><span class="muted">${escapeHTML(item?.name||"")}</span>${offgame?'<br><br><span class="muted">🌐 Off Game Event – nur Spielerprofil/Spielername</span>':""}<br><br>Aktueller Status: <strong>${labels[signup.status]||signup.status}</strong></div>
   <p class="muted">Was möchtest du ändern?</p>
   <div class="modal-actions" style="justify-content:flex-start">
     <button class="btn btn-green" onclick="manageOwnSignup('${type}',${id},'${escapeJS(player)}','${escapeJS(character)}','${escapeJS(pin)}','confirmed')">✅ Dabei</button>
