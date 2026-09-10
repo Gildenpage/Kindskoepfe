@@ -106,7 +106,9 @@ main{width:min(1280px,94%);margin:40px auto 80px}section{margin-bottom:70px}
 .card-title{color:var(--gold);font:700 25px Georgia,serif}.card-meta{margin-top:7px;color:#aaa;line-height:1.8}.card-body{padding:20px}
 .countdown{margin:18px 0;padding:16px;text-align:center;background:linear-gradient(135deg,#252015,#101920);border:1px solid #806229;border-radius:8px}
 .countdown-title{color:var(--gold);font-size:12px;text-transform:uppercase;letter-spacing:2px}.countdown-value{font-size:clamp(20px,4vw,34px);font-weight:bold}.countdown-value span{color:var(--gold2)}.started{color:#ed5d5d}
-.role-grid,.requirements,.limit-box{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}.requirements,.limit-box{grid-template-columns:repeat(3,1fr)}
+.role-grid,.requirements,.limit-box{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+.raid-role-summary{grid-template-columns:repeat(4,minmax(0,1fr))}.requirements,.limit-box{grid-template-columns:repeat(3,1fr)}
+.requirements.raid-role-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
 .role-box,.requirement,.limit-item{padding:13px;text-align:center;background:#0c141c;border:1px solid var(--border);border-radius:6px}
 .role-number,.requirement strong,.limit-item strong{display:block;font-size:25px;margin-bottom:4px}.tank .role-number,.tank strong,.limit-tank strong{color:#e1a45e}.heal .role-number,.heal strong,.limit-heal strong{color:#55d394}.dd .role-number,.dd strong,.limit-dd strong{color:#df6565}.free .role-number{color:#65a8df}
 .progress-label{display:flex;justify-content:space-between;margin-bottom:6px;color:#aaa}.progress{height:18px;overflow:hidden;margin-bottom:20px;background:#070a0e;border-radius:20px}.progress-bar{height:100%;background:linear-gradient(90deg,#9a7021,var(--gold2));transition:.3s}
@@ -847,15 +849,54 @@ section{margin-bottom:68px}
 .card-title{color:var(--gold2);font-size:25px}
 .card-body{padding:22px}
 .countdown{
+  position:relative;
   margin:20px 0;
-  padding:18px;
-  background:radial-gradient(circle at 50% 0,rgba(243,200,91,.10),transparent 60%),rgba(6,8,14,.78);
-  border:1px solid rgba(243,200,91,.24);
-  border-radius:12px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  padding:22px 24px 24px;
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% -20%,rgba(115,215,232,.13),transparent 52%),
+    linear-gradient(145deg,rgba(18,21,34,.98),rgba(7,9,16,.98));
+  border:1px solid rgba(115,215,232,.20);
+  border-radius:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 12px 30px rgba(0,0,0,.22);
+  overflow:hidden;
 }
-.countdown-title{color:var(--cyan)}
-.countdown-value{font-size:clamp(22px,4vw,36px);letter-spacing:.5px}
+.countdown::before{
+  content:"";
+  position:absolute;
+  top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(115,215,232,.7),rgba(243,200,91,.7),transparent);
+}
+.countdown-title{
+  position:relative;
+  color:var(--cyan);
+  font-size:clamp(14px,1.5vw,18px);
+  font-weight:800;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+.countdown-value{
+  position:relative;
+  font-size:clamp(24px,4vw,40px);
+  line-height:1.15;
+  font-weight:900;
+  letter-spacing:.3px;
+  text-shadow:0 0 22px rgba(255,255,255,.08);
+}
+.countdown-value span{
+  display:inline-block;
+  font-variant-numeric:tabular-nums;
+  color:#f3d67d;
+}
+.countdown-value .countdown-unit{
+  color:#e8eaf0;
+  font-weight:700;
+}
+@media(max-width:600px){
+  .countdown{padding:18px 12px 20px}
+  .countdown-title{letter-spacing:2px}
+}
 
 .role-box,.requirement,.limit-item,.player-card,.status-group{
   background:linear-gradient(145deg,rgba(22,24,38,.88),rgba(9,10,17,.94));
@@ -3563,6 +3604,67 @@ main > .raid-list-promo.raid-list-promo-wide{
   .card-meta-clean .card-meta-row strong{font-size:13px}
 }
 </style>
+
+<style id="eventplaner-raid-player-style-copy">
+/* Eventplaner: Teilnehmerkarten, freie Plätze/Wasserzeichen und Statusbereiche exakt im Raidplaner-Stil */
+.event-card .player-card:has(.admin-status-select){height:205px;min-height:205px}
+.event-card .player-card:has(.admin-status-select) .player-role-line{margin-top:8px}
+.event-card .player-card:has(.admin-status-select) .admin-status-select{flex:0 0 auto;margin-top:8px}
+.event-card .player-card:hover{transform:translateY(-2px);border-color:rgba(243,200,91,.28);box-shadow:0 12px 28px rgba(0,0,0,.25),0 0 18px rgba(243,200,91,.045)}
+.event-card .player-card>strong{color:#f1f2f7;font-size:15px;line-height:22px;min-height:22px;letter-spacing:.1px;margin:0 22px 6px 0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.event-card .player-card>small:not(.player-role-line):not(.player-gs){color:#9ea6b7;font-size:12px;line-height:1.45}
+.event-card .player-card>small:nth-of-type(1){min-height:17px;max-height:17px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.event-card .player-card>small:nth-of-type(2){min-height:35px;max-height:35px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.event-card .player-role-line{margin-top:auto;padding-top:8px;font-size:12px;color:#dce2eb!important}
+.event-card .player-role-icon{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.045)}
+.event-card .player-gs{display:block;margin-top:5px;font-size:13px;letter-spacing:.15px}
+.event-card .empty-slot{display:flex;align-items:center;justify-content:center;height:100%;min-height:82px;border:1px dashed rgba(255,255,255,.10);border-radius:9px;color:#697386;background:rgba(255,255,255,.012);position:relative;overflow:hidden;isolation:isolate}
+.event-card .empty-slot .free-slot-watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:-1;pointer-events:none;font-size:58px;line-height:1;opacity:.075;filter:saturate(.8)}
+.event-card .empty-slot.tank-slot .free-slot-watermark{color:#9fc7ff}
+.event-card .empty-slot.heal-slot .free-slot-watermark{color:#7ee3a4}
+.event-card .empty-slot.dd-slot .free-slot-watermark{color:#d8a4a4;opacity:.04}
+.event-card .empty-slot .free-slot-label{position:relative;z-index:1;color:#697386;font-size:14px}
+.event-card .status-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+.event-card .status-group{position:relative;padding:15px;min-width:0;background:linear-gradient(145deg,rgba(18,20,32,.96),rgba(9,10,17,.98));border:1px solid rgba(255,255,255,.075);border-radius:13px;box-shadow:0 8px 24px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.03)}
+.event-card .status-group h4{display:flex;align-items:center;gap:7px;margin:0 0 13px;padding-bottom:10px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.07);color:var(--gold2)}
+.event-card .status-group.bench{border-top:2px solid rgba(225,164,94,.42)}
+.event-card .status-group.uncertain{border-top:2px solid rgba(101,168,223,.42)}
+.event-card .status-group.absent{border-top:2px solid rgba(170,180,189,.34)}
+.event-card .status-group.bench h4{color:#e1a45e}
+.event-card .status-group.uncertain h4{color:#65a8df}
+.event-card .status-group.absent h4{color:#aab4bd}
+.event-card .status-player-grid{display:grid;grid-template-columns:1fr;gap:7px;margin-top:0}
+.event-card .status-player-grid .player-card{min-height:0;padding:11px 12px}
+.event-card .status-player-grid .player-card strong{margin-bottom:3px;font-size:13px}
+.event-card .status-player-grid .player-card small{font-size:11px}
+.event-card .status-player{display:flex;align-items:center;gap:5px;min-height:38px;padding:8px 9px;margin:0;border:1px solid rgba(255,255,255,.055);border-radius:8px;background:rgba(255,255,255,.018);font-size:12px}
+.event-card .status-player strong{color:#e7eaf0}
+.event-card .status-player .muted{color:#7f8999}
+.event-card .status-player .admin-status-select{margin-left:auto}
+.event-card .status-group>.muted{display:block;padding:8px 2px 3px;font-size:12px;color:#687386}
+@media(max-width:900px){.event-card .status-groups{grid-template-columns:1fr 1fr}.event-card .status-group.absent{grid-column:1/-1}}
+@media(max-width:600px){.event-card .player-grid{grid-template-columns:1fr 1fr}.event-card .status-groups{grid-template-columns:1fr}.event-card .status-group.absent{grid-column:auto}.event-card .player-card{height:150px;min-height:150px;padding:12px}.event-card .empty-slot .free-slot-watermark{font-size:50px}}
+@media(max-width:430px){.event-card .player-grid{grid-template-columns:1fr}}
+
+/* Angemeldete Spieler: gleiche vertikale Detaildarstellung wie im Raidplaner */
+.event-card .player-card .player-info-row{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px;margin-top:auto;padding-top:7px}
+.event-card .player-card .player-role-chip,.event-card .player-card .player-gs-chip{display:flex;width:auto;min-height:0;padding:0;border:0;border-radius:0;background:transparent;margin:0;font-size:12px;line-height:18px;font-weight:600}
+.event-card .player-card .player-role-chip.tank{color:#b8d9ff}
+.event-card .player-card .player-role-chip.heal{color:#8de7ae}
+.event-card .player-card .player-role-chip.dd{color:#ffb0b0}
+.event-card .player-card .player-gs-chip{color:#f3d46e;font-weight:700}
+.event-card .player-card.admin-managed{height:236px;min-height:236px}
+.event-card .player-card.admin-managed .player-info-row{margin-top:8px;padding-top:7px}
+.event-card .player-card.admin-managed .admin-profile-control{margin-top:8px;flex:0 0 auto}
+.event-card .player-card.admin-managed .admin-profile-label{margin-bottom:6px}
+.event-card .player-card.admin-managed .admin-status-select{min-height:32px;box-sizing:border-box}
+</style>
+
+
+
+
+
+
 </head>
 <body>
 <header class="hero"><div class="hero-content">
@@ -4203,10 +4305,11 @@ async function manageOwnSignup(type,id,player,character,pin,action){
   showToast(action==="delete"?"✅ Anmeldung entfernt.":"✅ Status: "+({confirmed:"Dabei",bench:"Ersatzbank",uncertain:"Unsicher",absent:"Abwesend"}[action]||action));
 }
 
-function renderCountdown(item){
+function renderCountdown(item,isEvent=false){
   const start=getStartDate(item).getTime();
-  return `<div class="countdown" data-countdown-start="${start}">
-    <div class="countdown-title">⏳ Beginn in</div>
+  const label=isEvent?"⏳ EVENT BEGINN IN":"⏳ RAID BEGINN IN";
+  return `<div class="countdown" data-countdown-start="${start}" data-countdown-label="${label}">
+    <div class="countdown-title">${label}</div>
     <div class="countdown-value countdown-value-live"></div>
   </div>`;
 }
@@ -4234,13 +4337,13 @@ function updateCountdowns(){
     const min=Math.floor(s/60);
     s%=60;
 
-    title.textContent="⏳ Beginn in";
+    title.textContent=el.dataset.countdownLabel||"⏳ RAID BEGINN IN";
     value.className="countdown-value countdown-value-live";
     value.innerHTML=
-      `<span>${d}</span> Tage · `+
-      `<span>${String(h).padStart(2,"0")}</span> Stunden · `+
-      `<span>${String(min).padStart(2,"0")}</span> Minuten · `+
-      `<span>${String(s).padStart(2,"0")}</span> Sekunden`;
+      `<span>${d}</span><span class="countdown-unit"> Tage</span> · `+
+      `<span>${String(h).padStart(2,"0")}</span><span class="countdown-unit"> Stunden</span> · `+
+      `<span>${String(min).padStart(2,"0")}</span><span class="countdown-unit"> Minuten</span> · `+
+      `<span>${String(s).padStart(2,"0")}</span><span class="countdown-unit"> Sekunden</span>`;
   });
 }
 // Eigene Anmeldungen werden ausschließlich über „Meine Anmeldung verwalten“ und den persönlichen PIN verwaltet.
@@ -4403,19 +4506,14 @@ function renderRaids(){
        ${isAdmin?`<div class="card-admin-actions"><button class="btn btn-secondary btn-small" onclick="openRaidForm(${r.id})">✏️ Bearbeiten</button> <button class="btn btn-danger btn-small" onclick="deleteRaid(${r.id})">🗑️ Löschen</button></div>`:""}
      </div>
      <div class="card-body">
-       ${renderCountdown(r)}
+       ${renderCountdown(r,false)}
        ${r.description?`<p class="card-description">${escapeHTML(r.description)}</p>`:""}
-       <div class="requirements">
-         <div class="requirement tank"><strong>${tanks}/${r.tank_limit}</strong>🛡️ Tanks</div>
-         <div class="requirement heal"><strong>${heals}/${r.heal_limit}</strong>💚 Heiler</div>
-         <div class="requirement dd"><strong>${dds}/${r.dd_limit}</strong>⚔️ DD´s</div>
-       </div>
-       <div class="role-grid">
-         <div class="role-box tank"><span class="role-number">${tanks}</span>🛡️ Tanks</div>
-         <div class="role-box heal"><span class="role-number">${heals}</span>💚 Heiler</div>
-         <div class="role-box dd"><span class="role-number">${dds}</span>⚔️ DDs</div>
-         <div class="role-box free"><span class="role-number">${free}</span>👥 Frei</div>
-       </div>
+       <div class="requirements raid-role-summary">
+       <div class="requirement tank"><strong>${tanks}/${r.tank_limit}</strong>🛡️ Tanks</div>
+       <div class="requirement heal"><strong>${heals}/${r.heal_limit}</strong>💚 Heiler</div>
+       <div class="requirement dd"><strong>${dds}/${r.dd_limit}</strong>⚔️ DD´s</div>
+       <div class="requirement free"><strong>${free}</strong>👥 Frei</div>
+     </div>
        <div class="progress-label"><span>Teilnehmer</span><span>${confirmed.length}/${r.size}</span></div>
        <div class="progress ${pct>=100?"progress-complete":""}"><div class="progress-bar" style="width:${pct}%"></div></div>
        <div class="player-grid">${ph}</div>
@@ -4532,15 +4630,15 @@ function renderEvents(){
      : '<span class="muted">Keine Einträge</span>';
 
    const statusList=(arr)=>arr.length
-      ? `<div class="player-grid status-player-grid">${arr.map(p=>renderSignupPlayerCard(p,`removeEventPlayer(${e.id},${p.id})`)).join("")}</div>`
-      : '<span class="muted">Keine Einträge</span>';
+     ? `<div class="player-grid status-player-grid">${arr.map(cardPlayer).join("")}</div>`
+     : '<span class="muted">Keine Einträge</span>';
 
-   c.insertAdjacentHTML("beforeend",`<article class="event-card">
+   c.insertAdjacentHTML("beforeend",`<article class="raid-card event-card-raid-style">
      <div class="card-header">
        <div>
          <div class="card-title">🎉 ${escapeHTML(e.name)}</div>
          <div class="card-meta card-meta-clean">
-           <div class="card-meta-row"><span class="card-meta-icon">🏷️</span><span>Art</span><strong>${escapeHTML(e.type)}</strong></div>
+           <div class="card-meta-row"><span class="card-meta-icon">👥</span><span>Teilnehmer</span><strong>${e.max}</strong></div>
            <div class="card-meta-row"><span class="card-meta-icon">📅</span><span>Datum</span><strong>${formatDate(e.date)}</strong></div>
            <div class="card-meta-row"><span class="card-meta-icon">🕐</span><span>Uhrzeit</span><strong>${escapeHTML(formatDisplayTime(e.time))} Uhr</strong></div>
          </div>
@@ -4548,12 +4646,13 @@ function renderEvents(){
        ${isAdmin?`<div class="card-admin-actions"><button class="btn btn-secondary btn-small" onclick="openEventForm(${e.id})">✏️ Bearbeiten</button> <button class="btn btn-danger btn-small" onclick="deleteEvent(${e.id})">🗑️ Löschen</button></div>`:""}
      </div>
      <div class="card-body">
-       ${renderCountdown(e)}
+       ${renderCountdown(e,true)}
        ${e.description?`<p class="card-description">${escapeHTML(e.description)}</p>`:""}
-       <div class="limit-box">
-         <div class="limit-item limit-tank"><strong>${tanks}/${e.tank_limit}</strong>🛡️ Tanks</div>
-         <div class="limit-item limit-heal"><strong>${heals}/${e.heal_limit}</strong>💚 Heiler</div>
-         <div class="limit-item limit-dd"><strong>${dds}/${e.dd_limit}</strong>⚔️ DD´s</div>
+       <div class="requirements raid-role-summary">
+         <div class="requirement tank"><strong>${tanks}/${e.tank_limit}</strong>🛡️ Tanks</div>
+         <div class="requirement heal"><strong>${heals}/${e.heal_limit}</strong>💚 Heiler</div>
+         <div class="requirement dd"><strong>${dds}/${e.dd_limit}</strong>⚔️ DD´s</div>
+         <div class="requirement free"><strong>${free}</strong>👥 Frei</div>
        </div>
        <div class="progress-label"><span>Teilnehmer</span><span>${confirmed.length}/${e.max}</span></div>
        <div class="progress ${pct>=100?"progress-complete":""}"><div class="progress-bar" style="width:${pct}%"></div></div>
@@ -4581,7 +4680,6 @@ function renderEvents(){
    </article>`);
  });
 }
-
 /* ===== BESUCHER-RAIDPROFIL-LOGIN ===== */
 let raidProfileSession = {player:"",pin:"",characters:[]};
 
@@ -5677,7 +5775,7 @@ renderAll();init();updateCountdowns();handleSectionNavigation();setInterval(upda
 <script>
 // Macht die drei vorhandenen Meta-Zeilen visuell sauberer, ohne die Daten/Logik zu ändern.
 document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('.raid-card .card-meta').forEach(meta=>{
+  document.querySelectorAll('.raid-card .card-meta, .event-card .card-meta').forEach(meta=>{
     if(meta.dataset.styled==='1') return;
     const lines=meta.innerHTML.split('<br>');
     const icons=['👥','📅','🕐'];
@@ -5694,6 +5792,18 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
+
+
+
+
+
+<style id="event-card-exact-raid-style">
+/* Eventplaner verwendet exakt dieselbe Kartenstruktur wie der Raidplaner.
+   Nur Inhalt/Countdown unterscheiden sich. */
+.event-card-raid-style{
+  /* bewusst keine eigene Optik: alle visuellen Regeln kommen vom .raid-card */
+}
+</style>
 </body>
 </html>
 <style>
