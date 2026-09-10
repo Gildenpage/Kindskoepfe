@@ -4733,7 +4733,7 @@ function renderEvents(){
    const benchCards=bench.length?`<div class="player-grid status-player-grid">${bench.map(cardPlayer).join("")}</div>`:'<span class="muted">Keine Einträge</span>';
    const statusList=(arr)=>arr.length?`<div class="player-grid status-player-grid">${arr.map(cardPlayer).join("")}</div>`:'<span class="muted">Keine Einträge</span>';
    const requirementHtml=offgame
-     ? `<div class="offgame-signup-note"><strong>🌐 Offgameevent</strong><span>Anmeldung nur mit Spielerprofil / Spielernamen. Keine Klasse, Spec, Offspec, GS oder Rolle erforderlich.</span></div>`
+     ? `<div class="offgame-signup-note"><strong>🌐 Off Game Event</strong><span>Anmeldung nur mit Spielerprofil / Spielernamen. Keine Klasse, Spec, Offspec, GS oder Rolle erforderlich.</span></div>`
      : `<div class="requirements raid-role-summary">
          <div class="requirement tank"><strong>${tanks}/${e.tank_limit}</strong>🛡️ Tanks</div>
          <div class="requirement heal"><strong>${heals}/${e.heal_limit}</strong>💚 Heiler</div>
