@@ -4608,9 +4608,9 @@ function openEventForm(id=null){
    <div class="form-row"><div class="form-group"><label>Datum *</label><input type="date" id="eventDate" value="${e?.date||""}"></div><div class="form-group"><label>Startzeit *</label><input type="time" id="eventTime" value="${e?.time||"20:00"}"></div></div>
    <div class="form-group"><label>Maximale Teilnehmer *</label><input type="number" id="eventMax" min="1" max="100" value="${e?.max||10}"></div>
    <div id="eventRoleLimits" class="role-limit-form">
-     <div><label>🛡️ Tanks</label><input type="number" id="eventTank" min="0" value="${e?.tank_limit??2}"></div>
-     <div><label>💚 Heiler</label><input type="number" id="eventHeal" min="0" value="${e?.heal_limit??3}"></div>
-     <div><label>⚔️ DDs</label><input type="number" id="eventDD" min="0" value="${e?.dd_limit??5}"></div>
+     <div><label>🛡️ Tanks</label><input type="number" id="eventTank" min="100" value="${e?.tank_limit??2}"></div>
+     <div><label>💚 Heiler</label><input type="number" id="eventHeal" min="100" value="${e?.heal_limit??3}"></div>
+     <div><label>⚔️ DDs</label><input type="number" id="eventDD" min="100" value="${e?.dd_limit??5}"></div>
    </div>
    <div class="form-group"><label>Beschreibung</label><textarea id="eventDescription">${e?escapeHTML(e.description):""}</textarea></div>
    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveEvent(${id===null?"null":id})">💾 Event speichern</button></div>`);
@@ -4632,12 +4632,12 @@ async function saveEvent(id){
    date:document.getElementById("eventDate").value,
    time:document.getElementById("eventTime").value,
    max,
-   // Offgameevents haben keine Rollenlimits. Intern bleiben die drei Limits auf 0,
-   // damit die Datenbank-Prüfung (Rollenlimits <= maximale Teilnehmerzahl) erfüllt ist.
-   // Die Teilnehmerzahl wird ausschließlich über max begrenzt.
+   // Offgameevents haben keine sichtbaren Rollenlimits. Für die bestehende
+   // Supabase-RPC verwenden wir DD nur als technische Sammelrolle und geben ihr
+   // alle Plätze. Auf der Oberfläche wird die Rolle weiterhin nie angezeigt.
    tank_limit:offgame?0:+document.getElementById("eventTank").value,
    heal_limit:offgame?0:+document.getElementById("eventHeal").value,
-   dd_limit:offgame?0:+document.getElementById("eventDD").value,
+   dd_limit:offgame?max:+document.getElementById("eventDD").value,
    description:document.getElementById("eventDescription").value.trim(),
    offgame_event:offgame
  };
