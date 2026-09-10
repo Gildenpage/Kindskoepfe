@@ -4594,7 +4594,7 @@ function openEventForm(id=null){
  if(!isAdmin){alert("Nur der Admin kann Events erstellen.");return;}
  const e=id===null?null:events.find(x=>x.id===id);
  if(id!==null&&!e)return;
- const offgame=!!e?.offgame_event;
+ const offgame=isOffgameEvent(e);
  openModal(`<h2>🎉 ${e?"Event bearbeiten":"Event erstellen"}</h2>
    <div class="form-group"><label>Eventname *</label><input id="eventName" value="${e?escapeHTML(e.name):""}"></div>
    <div class="form-group"><label>Art</label><input id="eventType" value="${e?escapeHTML(e.type):(offgame?"Offgameevent":"Gildenevent")}"></div>
@@ -4628,7 +4628,7 @@ async function saveEvent(id){
  const max=+document.getElementById("eventMax").value;
  const payload={
    name:document.getElementById("eventName").value.trim(),
-   type:document.getElementById("eventType").value.trim()||(offgame?"Offgameevent":"Event"),
+   type:offgame?"Offgameevent":(document.getElementById("eventType").value.trim()||"Event"),
    date:document.getElementById("eventDate").value,
    time:document.getElementById("eventTime").value,
    max,
@@ -4712,7 +4712,7 @@ function renderEvents(){
  }
  events.slice().sort((a,b)=>getStartDate(a)-getStartDate(b)).forEach(e=>{
    e.players=e.players||[];
-   const offgame=!!e.offgame_event;
+   const offgame=isOffgameEvent(e);
    const confirmed=e.players.filter(p=>(p.status||"confirmed")==="confirmed").sort(offgame?((a,b)=>String(a?.player||"").localeCompare(String(b?.player||""),undefined,{sensitivity:"base"})):signupRoleSort);
    const bench=e.players.filter(p=>p.status==="bench");
    const uncertain=e.players.filter(p=>p.status==="uncertain");
@@ -4903,6 +4903,14 @@ function getLoggedInRaidProfile(){
   return (raidProfileSession.player && raidProfileSession.pin) ? raidProfileSession : null;
 }
 
+/* ===== OFFGAME-EVENT HELPER ===== */
+function isOffgameEvent(item){
+  // Neue Events nutzen offgame_event. Zusätzlich erkennen wir alte/bereits
+  // gespeicherte Offgameevents über ihre Event-Art, damit sie niemals durch
+  // die normale rollenbasierte Anmeldung laufen.
+  return !!item?.offgame_event || normalizeName(item?.type).toLowerCase()==="offgameevent";
+}
+
 /* ===== ANMELDUNG ===== */
 let raidSignupContext = null;
 
@@ -4910,7 +4918,7 @@ function openSignup(type,id){
   const item=type==="raid"?raids.find(x=>x.id===id):events.find(x=>x.id===id);
   if(!item)return;
 
-  if(type==="event" && item.offgame_event){
+  if(type==="event" && isOffgameEvent(item)){
     const logged=getLoggedInRaidProfile();
     if(logged){ openOffgameSignupForm(id,logged); return; }
     openModal(`<h2>🌐 Offgameevent-Anmeldung</h2>
@@ -5000,8 +5008,10 @@ async function saveOffgameSignup(id){
   // Die Rollenlimits werden beim Speichern des Offgameevents intern auf die
   // maximale Teilnehmerzahl gesetzt. Damit entscheidet nur die Gesamtzahl der Plätze.
   if(result.ok===false){
-    if(result.needs_bench){
-      alert("Dieses Offgameevent ist bereits voll. Es sind keine freien Teilnehmerplätze mehr vorhanden.");
+    // Bei Offgameevents gibt es niemals eine Rollen-Ersatzbank-Abfrage.
+    // Jede Ablehnung wird als reine Platz-/Anmeldungsinformation behandelt.
+    if(result.needs_bench || /rolle|ersatzbank/i.test(String(result.message||""))){
+      alert("Dieses Offgameevent kann nicht über Rollen begrenzt werden. Bitte prüfe die freien Gesamtplätze des Events.");
     }else{
       alert(result.message||"Anmeldung konnte nicht gespeichert werden.");
     }
