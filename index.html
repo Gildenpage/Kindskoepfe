@@ -6307,3 +6307,275 @@ document.addEventListener('DOMContentLoaded',()=>{
   min-height:236px;
 }
 </style>
+
+
+
+
+<style id="mobile-no-horizontal-scroll-final">
+/* ===== Mobile Optimierung =====
+   Verhindert horizontales Scrollen und passt den kompletten Event-/Raidaufbau
+   sauber an Smartphone-Breiten an, ohne Desktop-Optik zu verändern.
+*/
+html, body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden !important;
+}
+
+*, *::before, *::after{
+  box-sizing:border-box;
+  max-width:100%;
+}
+
+img, video, canvas, svg{
+  max-width:100%;
+  height:auto;
+}
+
+main{
+  width:min(1320px,94%);
+  max-width:calc(100% - 20px);
+  min-width:0;
+}
+
+section,
+.news-card,
+.raid-card,
+.event-card,
+.card-header,
+.card-body,
+.countdown,
+.requirements,
+.role-grid,
+.player-grid,
+.status-groups,
+.status-group,
+.player-card{
+  min-width:0;
+  max-width:100%;
+}
+
+.countdown-value{
+  max-width:100%;
+  overflow:hidden;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+.card-title{
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+
+.card-meta-modern,
+.card-meta-clean{
+  min-width:0;
+  max-width:100%;
+}
+
+@media(max-width:700px){
+  main{
+    width:100%;
+    max-width:100%;
+    margin:20px auto 60px;
+    padding:0 10px;
+  }
+
+  section{
+    width:100%;
+    max-width:100%;
+  }
+
+  .raid-card,
+  .event-card{
+    width:100%;
+    max-width:100%;
+    overflow:hidden;
+    border-radius:12px;
+  }
+
+  .raid-card > .card-header{
+    width:100%;
+    max-width:100%;
+    overflow:hidden;
+  }
+
+  .raid-card > .card-header .card-title{
+    max-width:100%;
+    font-size:21px !important;
+    line-height:1.25;
+    overflow-wrap:anywhere;
+  }
+
+  .requirements.raid-role-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px;
+  }
+
+  .requirements.raid-role-summary .requirement{
+    min-width:0;
+    width:100%;
+    padding:12px 8px;
+  }
+
+  .progress-label{
+    min-width:0;
+    max-width:100%;
+  }
+
+  .progress{
+    width:100%;
+    max-width:100%;
+  }
+
+  .player-grid{
+    width:100%;
+    max-width:100%;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px;
+  }
+
+  .player-grid > .player-card,
+  .event-card .player-card,
+  .raid-card .player-card{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+
+  .status-groups{
+    width:100%;
+    max-width:100%;
+    grid-template-columns:1fr !important;
+    gap:10px;
+  }
+
+  .status-group{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    overflow:hidden;
+  }
+
+  .status-player-grid{
+    width:100%;
+    max-width:100%;
+  }
+
+  .status-player-grid .player-card{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+  }
+
+  .signup-actions-row{
+    width:100%;
+    max-width:100%;
+    display:grid !important;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .signup-actions-row .btn{
+    width:100%;
+    max-width:100%;
+  }
+
+  .countdown{
+    width:100%;
+    max-width:100%;
+    padding:16px 10px;
+    overflow:hidden;
+  }
+
+  .countdown-title{
+    font-size:14px;
+    letter-spacing:2px;
+  }
+
+  .countdown-value{
+    font-size:clamp(19px,6vw,30px) !important;
+    line-height:1.25;
+    white-space:normal !important;
+  }
+
+  .card-body{
+    width:100%;
+    max-width:100%;
+    padding:16px;
+  }
+}
+
+@media(max-width:430px){
+  main{
+    padding:0 7px;
+  }
+
+  .raid-card,
+  .event-card{
+    border-radius:10px;
+  }
+
+  .raid-card > .card-header{
+    padding:17px 14px 16px !important;
+  }
+
+  .raid-card > .card-header .card-title{
+    font-size:19px !important;
+  }
+
+  .raid-card > .card-header .card-meta-modern span{
+    font-size:12px;
+    gap:7px;
+  }
+
+  .requirements.raid-role-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+
+  .player-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  .player-grid > .player-card,
+  .event-card .player-card,
+  .raid-card .player-card{
+    height:140px;
+    min-height:140px;
+  }
+
+  .event-card .player-card.admin-managed,
+  .raid-card .player-card.admin-managed{
+    height:236px;
+    min-height:236px;
+  }
+
+  .empty-slot{
+    min-height:110px;
+  }
+
+  .event-card .empty-slot .free-slot-watermark,
+  .raid-card .empty-slot .free-slot-watermark{
+    font-size:48px;
+  }
+
+  nav{
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
+  .nav-main,
+  .nav-admin{
+    max-width:100%;
+    flex-wrap:wrap;
+  }
+
+  .nav-main > button,
+  .nav-admin button,
+  nav button{
+    max-width:100%;
+  }
+}
+</style>
