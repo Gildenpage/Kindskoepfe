@@ -4956,13 +4956,13 @@ function openOffgameSignupForm(id,profile){
   const item=events.find(x=>Number(x.id)===Number(id)); if(!item)return;
   openModal(`<h2>🌐 Offgameevent-Anmeldung</h2>
     <p class="muted">${escapeHTML(item.name)}</p>
-    <div class="news-card" style="margin-bottom:15px"><strong>👤 ${escapeHTML(profile.player)}</strong>
-      <div class="muted" style="margin-top:7px">Nur Spielername – ohne Charakter, Klasse, Spec, Offspec, GS oder Rolle.</div></div>
-    <div class="form-group"><label>Status *</label><select id="offgameSignupStatus">
-      <option value="confirmed">🟢 Dabei</option><option value="bench">🪑 Ersatzbank</option>
-      <option value="uncertain">❓ Unsicher</option><option value="absent">🚫 Abwesend</option></select></div>
+    <div class="news-card" style="margin-bottom:15px">
+      <label style="display:block;margin-bottom:7px">Spielername *</label>
+      <input id="offgameSignupPlayer" value="${escapeHTML(profile.player)}" readonly>
+      <div class="muted" style="margin-top:7px">Nur dein Spielername wird gespeichert. Kein Charakter, keine Klasse, Spec, GS oder Rolle.</div>
+    </div>
     <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
-    <button class="btn btn-primary" onclick="saveOffgameSignup(${id})">💾 Anmeldung speichern</button></div>`);
+    <button class="btn btn-primary" onclick="saveOffgameSignup(${id})">🟢 Als dabei anmelden</button></div>`);
 }
 
 async function verifyOffgameSignupPin(id){
@@ -4979,48 +4979,34 @@ async function saveOffgameSignup(id){
   const logged=getLoggedInRaidProfile();
   if(!logged){alert("Bitte zuerst mit einem bestehenden Spielerprofil anmelden.");return;}
 
-  // Für Offgameevents verwenden wir das bestehende Raidprofil nur zur sicheren
-  // PIN-Prüfung. Die Charakterdaten werden auf der Offgame-Karte nicht angezeigt.
-  const character=Array.isArray(logged.characters)?logged.characters.find(c=>c?.id)||logged.characters[0]:null;
-  if(!character?.id){
-    alert("Zu deinem Spielerprofil wurde kein Charakter gefunden. Bitte prüfe dein Raidprofil.");
+  const player=normalizeName(document.getElementById("offgameSignupPlayer")?.value)||normalizeName(logged.player);
+  if(!player){alert("Spielername fehlt.");return;}
+
+  // Offgameevents werden bewusst ohne Charakter/Rolle über die normale
+  // Spieler-Anmeldungs-RPC gespeichert. Die Rollenfelder bleiben leer,
+  // damit ausschließlich die Gesamtzahl der Eventplätze zählt.
+  const {data,error}=await supabaseClient.rpc("register_signup_status",{
+    p_item_type:"event",
+    p_item_id:id,
+    p_player:player,
+    p_character:"",
+    p_class_name:"",
+    p_spec:"",
+    p_role:null,
+    p_status:"confirmed",
+    p_pin:logged.pin
+  });
+
+  if(error){dbError(error);return;}
+  if(data?.ok===false){
+    alert(data.message||"Anmeldung konnte nicht gespeichert werden.");
     return;
   }
 
-  const status=document.getElementById("offgameSignupStatus")?.value||"confirmed";
-
-  const submit=async(signupStatus)=>{
-    const {data,error}=await supabaseClient.rpc("register_signup_from_raidkader",{
-      p_item_type:"event",
-      p_item_id:id,
-      p_raidkader_id:character.id,
-      p_pin:logged.pin,
-      p_status:signupStatus
-    });
-    if(error){dbError(error);return null;}
-    return data||{ok:true};
-  };
-
-  let result=await submit(status);
-  if(!result)return;
-
-  // Offgameevents sollen niemals wegen einer Rolle auf die Ersatzbank verweisen.
-  // Die Rollenlimits werden beim Speichern des Offgameevents intern auf die
-  // maximale Teilnehmerzahl gesetzt. Damit entscheidet nur die Gesamtzahl der Plätze.
-  if(result.ok===false){
-    // Bei Offgameevents gibt es niemals eine Rollen-Ersatzbank-Abfrage.
-    // Jede Ablehnung wird als reine Platz-/Anmeldungsinformation behandelt.
-    if(result.needs_bench || /rolle|ersatzbank/i.test(String(result.message||""))){
-      alert("Dieses Offgameevent kann nicht über Rollen begrenzt werden. Bitte prüfe die freien Gesamtplätze des Events.");
-    }else{
-      alert(result.message||"Anmeldung konnte nicht gespeichert werden.");
-    }
-    return;
-  }
-
+  if(data?.signup_token)rememberSignupToken("event",id,data.signup_token);
   closeModal();
   await refreshData();
-  showToast("🌐 Offgameevent-Anmeldung gespeichert.");
+  showToast("🌐 "+player+" ist dabei.");
 }
 
 async function verifyRaidSignupPin(type,id){
