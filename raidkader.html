@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -1278,7 +1277,9 @@ Wichtig: Bewahre deinen PIN sicher auf und gebe ihn nicht weiter.</span>
 <script>
 const SUPABASE_URL="https://lljhicrxjhfmddclyjme.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_sS-deTm_y0JaocBmRo8DvQ_hUBY1QyY";
-const classes={"Krieger":[["Waffen","DD"],["Furor","DD"],["Schutz","Tank"]],"Paladin":[["Heilig","Heiler"],["Schutz","Tank"],["Vergeltung","DD"]],"Jäger":[["Tierherrschaft","DD"],["Treffsicherheit","DD"],["Überleben","DD"]],"Schurke":[["Meucheln","DD"],["Kampf","DD"],["Täuschung","DD"]],"Priester":[["Disziplin","Heiler"],["Heilig","Heiler"],["Schatten","DD"]],"Schamane":[["Elementar","DD"],["Verstärkung","DD"],["Wiederherstellung","Heiler"]],"Magier":[["Arkan","DD"],["Feuer","DD"],["Frost","DD"]],"Hexenmeister":[["Gebrechen","DD"],["Dämonologie","DD"],["Zerstörung","DD"]],"Druide":[["Gleichgewicht","DD"],["Wildheit","DD"],["Wiederherstellung","Heiler"]]} ;
+const classes={"Krieger":[["Waffen","DD"],["Furor","DD"],["Schutz","Tank"]],"Paladin":[["Heilig","Heiler"],["Schutz","Tank"],["Vergeltung","DD"]],"Jäger":[["Tierherrschaft","DD"],["Treffsicherheit","DD"],["Überleben","DD"]],"Schurke":[["Meucheln","DD"],["Kampf","DD"],["Täuschung","DD"]],"Priester":[["Disziplin","Heiler"],["Heilig","Heiler"],["Schatten","DD"]],"Schamane":[["Elementar","DD"],["Verstärkung","DD"],["Wiederherstellung","Heiler"]],"Magier":[["Arkan","DD"],["Feuer","DD"],["Frost","DD"]],"Hexenmeister":[["Gebrechen","DD"],["Dämonologie","DD"],["Zerstörung","DD"]],"Druide":[["Gleichgewicht","DD"],["Wilder Kampf","DD"],["Wiederherstellung","Heiler"]]};
+function splitForeverCharacterName(value){const parts=String(value??"").trim().split(/\s+/).filter(Boolean);return {first:parts.shift()||"",last:parts.join(" ")};}
+function buildForeverCharacterName(first,last){return [String(first??"").trim(),String(last??"").trim()].filter(Boolean).join(" ");}
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);let rows=[],isAdmin=false,verifiedPlayer="",verifiedPin="",managePlayer="",managePin="",formMode="create";
 const $=id=>document.getElementById(id);function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
 
@@ -1405,7 +1406,7 @@ function profileForm(player="",mode="create",existing=null){
     <div class="add-character-player">Füge deinem bestehenden Spielerprofil einen weiteren Charakter hinzu.</div>
     <input id="pName" type="hidden" value="${esc(player)}">
     <div class="grid">
-      <div class="form-group"><label>Charaktername *</label><input id="pChar" value="${esc(e.character_name||"")}" placeholder="z. B. Dr.Mett"></div>
+      <div class="form-group"><label>Vorname des Charakters *</label><input id="pCharFirst" value="${esc(splitForeverCharacterName(e.character_name).first)}" placeholder="z. B. Dr"></div><div class="form-group"><label>Nachname des Charakters *</label><input id="pCharLast" value="${esc(splitForeverCharacterName(e.character_name).last)}" placeholder="z. B. Mett"></div>
       <div class="form-group"><label>Klasse *</label><select id="pClass" onchange="updateSpecs('pClass','pSpec','pRole','pSpec2','pRole2')"><option value="">Klasse wählen</option>${Object.keys(classes).map(c=>`<option ${c===e.class_name?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
       <div class="form-group"><label>1. Spezialisierung *</label><select id="pSpec"><option value="">Zuerst Klasse wählen</option></select></div>
       <div class="form-group"><label>Rolle</label><select id="pRole" disabled><option>Automatisch</option></select></div>
@@ -1416,7 +1417,7 @@ function profileForm(player="",mode="create",existing=null){
     <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveProfile()">➕ Charakter hinzufügen</button></div>
   </div>`:`<h2>👤 Raidprofil hinzufügen</h2><p class="muted">Lege dein Spielerprofil einmalig an. Deinen PIN benötigst du später zur Verwaltung.</p><div class="profile-create-grid">
     <div class="form-group"><label>Spielername *</label><input id="pName" value="${esc(player)}" placeholder="z. B. Toni"></div>
-    <div class="form-group"><label>Charaktername *</label><input id="pChar" value="${esc(e.character_name||"")}" placeholder="z. B. Dr.Mett"></div>
+    <div class="form-group"><label>Vorname des Charakters *</label><input id="pCharFirst" value="${esc(splitForeverCharacterName(e.character_name).first)}" placeholder="z. B. Dr"></div><div class="form-group"><label>Nachname des Charakters *</label><input id="pCharLast" value="${esc(splitForeverCharacterName(e.character_name).last)}" placeholder="z. B. Mett"></div>
     <div class="form-group profile-single"><label>Klasse *</label><select id="pClass" onchange="updateSpecs('pClass','pSpec','pRole','pSpec2','pRole2')"><option value="">Klasse wählen</option>${Object.keys(classes).map(c=>`<option ${c===e.class_name?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
     <div class="form-group"><label>1. Spezialisierung *</label><select id="pSpec"><option value="">Zuerst Klasse wählen</option></select></div>
     <div class="form-group"><label>Rolle</label><select id="pRole" disabled><option>Automatisch</option></select></div>
@@ -1443,8 +1444,8 @@ function updateSpecs(c,s,r,s2,r2){
 
 async function saveProfile(){
   try{
-    const p=$("pName").value.trim(),c=$("pChar").value.trim(),cl=$("pClass").value,s=$("pSpec").value,r=$("pRole").value,s2=$("pSpec2").value,r2=$("pRole2").value,n=Number($("pIlvl").value);
-    if(!p||!c||!cl||!s||!r||!n)return alert("Bitte Name, Charakter, Klasse, 1. Spezialisierung und Gegenstandsstufe ausfüllen.");
+    const p=$("pName").value.trim(),c=buildForeverCharacterName($("pCharFirst").value,$("pCharLast").value),cl=$("pClass").value,s=$("pSpec").value,r=$("pRole").value,s2=$("pSpec2").value,r2=$("pRole2").value,n=Number($("pIlvl").value);
+    if(!p||!$("pCharFirst").value.trim()||!$("pCharLast").value.trim()||!cl||!s||!r||!n)return alert("Bitte Name, Vorname, Nachname, Klasse, 1. Spezialisierung und Gegenstandsstufe ausfüllen.");
     if(s2===s)return alert("Die Offspec muss sich von der 1. Spezialisierung unterscheiden.");
     if(formMode==="add"){
       const authPlayer=(verifiedPlayer||managePlayer||"").trim();
@@ -1633,14 +1634,15 @@ async function loginAdmin(){const {data,error}=await sb.auth.signInWithPassword(
 async function adminState(session){if(!session){isAdmin=false}else{const {data}=await sb.rpc("is_admin");isAdmin=data===true}$("adminStatus").classList.toggle("show",isAdmin);render()}
 function adminEdit(id){
   const r=rows.find(x=>x.id===id);if(!r)return;const opts=Object.keys(classes).map(c=>`<option ${c===r.class_name?"selected":""}>${esc(c)}</option>`).join("");
-  openModal(`<h2>👑 Raidkader – Charakter bearbeiten</h2><div class="grid"><div class="form-group"><label>Spielername</label><input id="aPlayer" value="${esc(r.player_name)}"></div><div class="form-group"><label>Charaktername</label><input id="aChar" value="${esc(r.character_name)}"></div><div class="form-group"><label>Klasse</label><select id="aClass" onchange="updateSpecs('aClass','aSpec','aRole','aSpec2','aRole2')">${opts}</select></div><div class="form-group"><label>1. Spezialisierung</label><select id="aSpec"></select></div><div class="form-group"><label>Rolle</label><select id="aRole" disabled></select></div><div class="form-group"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="aSpec2"></select></div><div class="form-group"><label>Offspec-Rolle</label><select id="aRole2" disabled></select></div><div class="form-group"><label>Gegenstandsstufe</label><input id="aIlvl" type="number" min="1" max="999" value="${esc(r.item_level)}"></div></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveAdmin(${id})">💾 Speichern</button></div>`);
+  openModal(`<h2>👑 Raidkader – Charakter bearbeiten</h2><div class="grid"><div class="form-group"><label>Spielername</label><input id="aPlayer" value="${esc(r.player_name)}"></div><div class="form-group"><label>Vorname des Charakters</label><input id="aCharFirst" value="${esc(splitForeverCharacterName(r.character_name).first)}"></div><div class="form-group"><label>Nachname des Charakters</label><input id="aCharLast" value="${esc(splitForeverCharacterName(r.character_name).last)}"></div><div class="form-group"><label>Klasse</label><select id="aClass" onchange="updateSpecs('aClass','aSpec','aRole','aSpec2','aRole2')">${opts}</select></div><div class="form-group"><label>1. Spezialisierung</label><select id="aSpec"></select></div><div class="form-group"><label>Rolle</label><select id="aRole" disabled></select></div><div class="form-group"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="aSpec2"></select></div><div class="form-group"><label>Offspec-Rolle</label><select id="aRole2" disabled></select></div><div class="form-group"><label>Gegenstandsstufe</label><input id="aIlvl" type="number" min="1" max="999" value="${esc(r.item_level)}"></div></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveAdmin(${id})">💾 Speichern</button></div>`);
   updateSpecs("aClass","aSpec","aRole","aSpec2","aRole2");$("aSpec").value=r.spec;$("aSpec").onchange();const offspec=getOffspec(r);if(offspec)$("aSpec2").value=offspec;$("aSpec2").onchange();
 }
 async function saveAdmin(id){
   const cl=$("aClass").value,s=$("aSpec").value,r=$("aRole").value,s2=($("aSpec2").value||"").trim(),r2=$("aRole2").value,n=Number($("aIlvl").value);
-  if(!$("aPlayer").value.trim()||!$("aChar").value.trim()||!cl||!s||!r||!n)return alert("Bitte Spielername, Charakter, Klasse, 1. Spezialisierung und Gegenstandsstufe ausfüllen.");
+  const aChar=buildForeverCharacterName($("aCharFirst").value,$("aCharLast").value);
+  if(!$("aPlayer").value.trim()||!$("aCharFirst").value.trim()||!$("aCharLast").value.trim()||!cl||!s||!r||!n)return alert("Bitte Spielername, Vorname, Nachname, Klasse, 1. Spezialisierung und Gegenstandsstufe ausfüllen.");
   if(s2===s)return alert("Die Offspec muss sich von der 1. Spezialisierung unterscheiden.");
-  const {data,error}=await sb.rpc("admin_update_raidkader",{p_id:id,p_player_name:$("aPlayer").value.trim(),p_character_name:$("aChar").value.trim(),p_class_name:cl,p_spec:s,p_role:r,p_spec2:s2||null,p_role2:s2?(r2||null):null,p_item_level:n});
+  const {data,error}=await sb.rpc("admin_update_raidkader",{p_id:id,p_player_name:$("aPlayer").value.trim(),p_character_name:aChar,p_class_name:cl,p_spec:s,p_role:r,p_spec2:s2||null,p_role2:s2?(r2||null):null,p_item_level:n});
   if(error)return alert("Änderung fehlgeschlagen: "+error.message);
   if(data?.ok===false)return alert(data.message||"Änderung fehlgeschlagen.");
 
