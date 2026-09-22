@@ -3776,8 +3776,11 @@ const wowClasses={
  "Schamane":[["Elementar","DD"],["Verstärkung","DD"],["Wiederherstellung","Heiler"]],
  "Magier":[["Arkan","DD"],["Feuer","DD"],["Frost","DD"]],
  "Hexenmeister":[["Gebrechen","DD"],["Dämonologie","DD"],["Zerstörung","DD"]],
- "Druide":[["Gleichgewicht","DD"],["Wildheit","DD"],["Wiederherstellung","Heiler"]]
+ "Druide":[["Gleichgewicht","DD"],["Wilder Kampf","DD"],["Wiederherstellung","Heiler"]]
 };
+
+function splitForeverCharacterName(value){const parts=String(value??"").trim().split(/\s+/).filter(Boolean);return {first:parts.shift()||"",last:parts.join(" ")};}
+function buildForeverCharacterName(first,last){return [String(first??"").trim(),String(last??"").trim()].filter(Boolean).join(" ");}
 
 let supabaseClient=null;
 let news=[],raids=[],events=[];
@@ -4177,7 +4180,7 @@ function renderNews(){
 /* ===== RAIDS ===== */
 function openRaidForm(id=null){
  if(!isAdmin){alert("Nur der Admin kann Raids erstellen.");return;}const r=id===null?null:raids.find(x=>x.id===id);if(id!==null&&!r)return;
- openModal(`<h2>⚔️ ${r?"Raid bearbeiten":"Raid erstellen"}</h2><div class="form-group"><label>Raidname *</label><input id="raidName" value="${r?escapeHTML(r.name):""}" placeholder="z.B. Mogu'shan Palast"></div><div class="form-group"><label>Raidgröße *</label><select id="raidSize"><option value="10">10 Spieler</option><option value="25">25 Spieler</option></select></div><div class="form-row"><div class="form-group"><label>Datum *</label><input type="date" id="raidDate" value="${r?.date||""}"></div><div class="form-group"><label>Startzeit *</label><input type="time" id="raidTime" value="${r?.time||"20:00"}"></div></div><h3 style="color:var(--gold)">Rollenanforderungen</h3><div class="role-limit-form"><div><label>🛡️ Tanks</label><input type="number" id="raidTankLimit" min="0" max="25" value="${r?.tank_limit??2}"></div><div><label>💚 Heiler</label><input type="number" id="raidHealLimit" min="0" max="25" value="${r?.heal_limit??5}"></div><div><label>⚔️ DDs</label><input type="number" id="raidDDLimit" min="0" max="25" value="${r?.dd_limit??3}"></div></div><p id="raidTotalPreview" class="muted"></p><div class="form-group"><label>Beschreibung</label><textarea id="raidDescription">${r?escapeHTML(r.description):""}</textarea></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveRaid(${id===null?"null":id})">💾 Raid speichern</button></div>`);document.getElementById("raidSize").value=String(r?.size||10);updateRaidTotal();["raidTankLimit","raidHealLimit","raidDDLimit","raidSize"].forEach(x=>document.getElementById(x).addEventListener("input",updateRaidTotal));
+ openModal(`<h2>⚔️ ${r?"Raid bearbeiten":"Raid erstellen"}</h2><div class="form-group"><label>Raidname *</label><input id="raidName" value="${r?escapeHTML(r.name):""}" placeholder="z.B. Mogu'shan Palast"></div><div class="form-group"><label>Raidgröße *</label><select id="raidSize"><option value="10">10 Spieler</option><option value="20">20 Spieler</option><option value="40">40 Spieler</option></select></div><div class="form-row"><div class="form-group"><label>Datum *</label><input type="date" id="raidDate" value="${r?.date||""}"></div><div class="form-group"><label>Startzeit *</label><input type="time" id="raidTime" value="${r?.time||"20:00"}"></div></div><h3 style="color:var(--gold)">Rollenanforderungen</h3><div class="role-limit-form"><div><label>🛡️ Tanks</label><input type="number" id="raidTankLimit" min="0" max="40" value="${r?.tank_limit??2}"></div><div><label>💚 Heiler</label><input type="number" id="raidHealLimit" min="0" max="40" value="${r?.heal_limit??5}"></div><div><label>⚔️ DDs</label><input type="number" id="raidDDLimit" min="0" max="40" value="${r?.dd_limit??3}"></div></div><p id="raidTotalPreview" class="muted"></p><div class="form-group"><label>Beschreibung</label><textarea id="raidDescription">${r?escapeHTML(r.description):""}</textarea></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveRaid(${id===null?"null":id})">💾 Raid speichern</button></div>`);document.getElementById("raidSize").value=String([10,20,40].includes(Number(r?.size))?r.size:10);updateRaidTotal();["raidTankLimit","raidHealLimit","raidDDLimit","raidSize"].forEach(x=>document.getElementById(x).addEventListener("input",updateRaidTotal));
 }
 function updateRaidTotal(){const a=+document.getElementById("raidTankLimit")?.value||0,b=+document.getElementById("raidHealLimit")?.value||0,c=+document.getElementById("raidDDLimit")?.value||0,s=+document.getElementById("raidSize")?.value||0,p=document.getElementById("raidTotalPreview");if(p)p.innerHTML=a+b+c>s?`<span style="color:#ff6969">⚠️ ${a+b+c}/${s} Rollen – zu viele!</span>`:`Rollen: ${a+b+c}/${s}`;}
 async function saveRaid(id){ if(!isAdmin){alert("Admin-Sitzung ist nicht mehr aktiv. Bitte neu einloggen.");return;}
@@ -5267,7 +5270,7 @@ function updateRaidkaderSpecs(){
 }
 
 function resetRaidkaderForm(){
-  ["rkName","rkChar","rkIlvl","rkPin"].forEach(id=>{
+  ["rkName","rkCharFirst","rkCharLast","rkIlvl","rkPin"].forEach(id=>{
     const el=document.getElementById(id); if(el)el.value="";
   });
   const cls=document.getElementById("rkClass"), spec=document.getElementById("rkSpec"), role=document.getElementById("rkRole"), offspec=document.getElementById("rkSpec2"), offrole=document.getElementById("rkRole2");
@@ -5303,7 +5306,7 @@ function roleClass(role){
   return role==="Tank"?"rk-role-tank":role==="Heiler"?"rk-role-heiler":"rk-role-dd";
 }
 function classClass(name){
-  const map={"Krieger":"rk-class-warrior","Paladin":"rk-class-paladin","Jäger":"rk-class-hunter","Schurke":"rk-class-rogue","Priester":"rk-class-priest","Schamane":"rk-class-shaman","Magier":"rk-class-mage","Hexenmeister":"rk-class-warlock","Druide":"rk-class-druid"};
+  const map={"Druide":"rk-class-druid","Jäger":"rk-class-hunter","Magier":"rk-class-mage","Paladin":"rk-class-paladin","Priester":"rk-class-priest","Schamane":"rk-class-shaman","Schurke":"rk-class-rogue","Hexenmeister":"rk-class-warlock","Krieger":"rk-class-warrior"};
   return map[name]||"";
 }
 
@@ -5386,16 +5389,18 @@ function openRaidkaderForm(playerName="", mode="create"){
         <input id="rkName" autocomplete="name" value="${escapeHTML(preset)}" ${isAdd?"readonly":""} placeholder="z. B. Toni">
       </div>
       <div class="form-group">
-        <label for="rkChar">Charaktername *</label>
-        <input id="rkChar" placeholder="z. B. Dr.Mett">
+        <label for="rkCharFirst">Vorname des Charakters *</label>
+        <input id="rkCharFirst" placeholder="z. B. Dr">
+      </div>
+      <div class="form-group">
+        <label for="rkCharLast">Nachname des Charakters *</label>
+        <input id="rkCharLast" placeholder="z. B. Mett">
       </div>
       <div class="form-group rk-class-group">
          <label for="rkClass">Klasse *</label>
         <select id="rkClass" onchange="updateRaidkaderSpecs()">
           <option value="">Klasse wählen</option>
-          <option>Krieger</option><option>Paladin</option><option>Jäger</option><option>Schurke</option>
-          <option>Priester</option><option>Schamane</option><option>Magier</option><option>Hexenmeister</option>
-          <option>Druide</option>
+          ${Object.keys(wowClasses).map(c=>`<option>${escapeHTML(c)}</option>`).join("")}
         </select>
       </div>
       <div class="form-group">
@@ -5477,7 +5482,9 @@ function confirmRaidProfileCreated(){
 
 async function saveRoster(){
   const player=document.getElementById("rkName").value.trim();
-  const character=document.getElementById("rkChar").value.trim();
+  const characterFirst=document.getElementById("rkCharFirst").value.trim();
+  const characterLast=document.getElementById("rkCharLast").value.trim();
+  const character=buildForeverCharacterName(characterFirst,characterLast);
   const className=document.getElementById("rkClass").value;
   const spec=document.getElementById("rkSpec").value;
   const spec2=document.getElementById("rkSpec2")?.value||"";
@@ -5487,8 +5494,8 @@ async function saveRoster(){
   const role2=offRoleEntry ? offRoleEntry[1] : "";
   const ilvl=Number(document.getElementById("rkIlvl").value);
 
-  if(!player||!character||!className||!spec||!role||!ilvl){
-    alert("Bitte Name, Charakter, Klasse, Spezialisierung und Gegenstandsstufe ausfüllen.");
+  if(!player||!characterFirst||!characterLast||!className||!spec||!role||!ilvl){
+    alert("Bitte Spielername, Vorname, Nachname, Klasse, Spezialisierung und Gegenstandsstufe ausfüllen.");
     return;
   }
   if(spec2===spec){
@@ -5732,7 +5739,7 @@ function openRaidkaderEdit(row){
   const classOptions=Object.keys(wowClasses).map(c=>`<option value="${escapeHTML(c)}" ${c===row.class_name?"selected":""}>${escapeHTML(c)}</option>`).join("");
   const spec2=row?.Offspec ?? row?.offspec ?? row?.spec2 ?? "";
   openModal(`<h2>✏️ ${escapeHTML(row.character_name)} bearbeiten</h2>
-    <div class="form-row"><div class="form-group"><label>Spielername</label><input id="rkePlayer" value="${escapeHTML(raidKaderManagePlayer)}" readonly></div><div class="form-group"><label>Charaktername</label><input id="rkeChar" value="${escapeHTML(row.character_name)}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Spielername</label><input id="rkePlayer" value="${escapeHTML(raidKaderManagePlayer)}" readonly></div><div class="form-group"><label>Vorname des Charakters</label><input id="rkeCharFirst" value="${escapeHTML(splitForeverCharacterName(row.character_name).first)}"></div><div class="form-group"><label>Nachname des Charakters</label><input id="rkeCharLast" value="${escapeHTML(splitForeverCharacterName(row.character_name).last)}"></div></div>
     <div class="form-row"><div class="form-group"><label>Klasse</label><select id="rkeClass" onchange="updateEditSpecs()">${classOptions}</select></div><div class="form-group"><label>Spezialisierung</label><select id="rkeSpec"></select></div></div>
     <div class="form-row"><div class="form-group"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="rkeSpec2"></select></div><div class="form-group"><label>Offspec-Rolle</label><select id="rkeRole2" disabled></select></div></div>
     <div class="form-row"><div class="form-group"><label>Rolle</label><select id="rkeRole" disabled></select></div><div class="form-group"><label>Gegenstandsstufe</label><input id="rkeIlvl" type="number" min="1" max="999" value="${escapeHTML(String(row.item_level))}"></div></div>
@@ -5759,8 +5766,8 @@ function updateEditSpecs(){
 }
 
 async function saveMyRaidkaderEdit(id){
-  const character=document.getElementById("rkeChar").value.trim(),className=document.getElementById("rkeClass").value,spec=document.getElementById("rkeSpec").value,role=document.getElementById("rkeRole").value,spec2=document.getElementById("rkeSpec2")?.value||"",role2=document.getElementById("rkeRole2")?.value||"",ilvl=Number(document.getElementById("rkeIlvl").value);
-  if(!character||!className||!spec||!role||!ilvl){alert("Bitte alle Pflichtfelder ausfüllen.");return;}
+  const character=buildForeverCharacterName(document.getElementById("rkeCharFirst").value,document.getElementById("rkeCharLast").value),className=document.getElementById("rkeClass").value,spec=document.getElementById("rkeSpec").value,role=document.getElementById("rkeRole").value,spec2=document.getElementById("rkeSpec2")?.value||"",role2=document.getElementById("rkeRole2")?.value||"",ilvl=Number(document.getElementById("rkeIlvl").value);
+  if(!document.getElementById("rkeCharFirst").value.trim()||!document.getElementById("rkeCharLast").value.trim()||!className||!spec||!role||!ilvl){alert("Bitte Vorname, Nachname, Klasse, Spezialisierung und Gegenstandsstufe ausfüllen.");return;}
   const {data,error}=await supabaseClient.rpc("update_my_raidkader",{p_id:Number(id),p_player_name:raidKaderManagePlayer,p_pin:raidKaderManagePin,p_character_name:character,p_class_name:className,p_spec:spec,p_role:role,p_spec2:spec2||null,p_role2:role2||null,p_item_level:ilvl});
   if(error){alert("Änderung fehlgeschlagen: "+error.message);return;} if(data?.ok===false){alert(data.message||"Änderung fehlgeschlagen.");return;}
   const {data:ilvlData,error:ilvlError}=await supabaseClient.rpc("update_my_raidkader_item_level",{p_id:Number(id),p_player_name:raidKaderManagePlayer,p_pin:raidKaderManagePin,p_item_level:ilvl});
@@ -5787,7 +5794,7 @@ function adminEditRaidkader(id){
   openModal(`<h2>👑 Raidkader – Charakter bearbeiten</h2>
     <div class="form-row">
       <div class="form-group"><label>Spielername</label><input id="rkaPlayer" value="${escapeHTML(row.player_name)}"></div>
-      <div class="form-group"><label>Charaktername</label><input id="rkaChar" value="${escapeHTML(row.character_name)}"></div>
+      <div class="form-group"><label>Vorname des Charakters</label><input id="rkaCharFirst" value="${escapeHTML(splitForeverCharacterName(row.character_name).first)}"></div><div class="form-group"><label>Nachname des Charakters</label><input id="rkaCharLast" value="${escapeHTML(splitForeverCharacterName(row.character_name).last)}"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Klasse</label><select id="rkaClass" onchange="updateAdminSpecs()">${Object.keys(wowClasses).map(c=>`<option value="${escapeHTML(c)}" ${c===row.class_name?"selected":""}>${escapeHTML(c)}</option>`).join("")}</select></div>
@@ -5818,10 +5825,10 @@ function updateAdminSpecs(){
   };
 }
 async function saveAdminRaidkader(id){
-  const player=document.getElementById("rkaPlayer").value.trim(),character=document.getElementById("rkaChar").value.trim(),
+  const player=document.getElementById("rkaPlayer").value.trim(),character=buildForeverCharacterName(document.getElementById("rkaCharFirst").value,document.getElementById("rkaCharLast").value),
     className=document.getElementById("rkaClass").value,spec=document.getElementById("rkaSpec").value,
     role=document.getElementById("rkaRole").value,ilvl=Number(document.getElementById("rkaIlvl").value);
-  if(!player||!character||!className||!spec||!role||!ilvl){alert("Bitte alle Felder ausfüllen.");return;}
+  if(!player||!document.getElementById("rkaCharFirst").value.trim()||!document.getElementById("rkaCharLast").value.trim()||!className||!spec||!role||!ilvl){alert("Bitte Spielername, Vorname, Nachname, Klasse, Spezialisierung und Gegenstandsstufe ausfüllen.");return;}
   const {data,error}=await supabaseClient.rpc("admin_update_raidkader",{
     p_id:Number(id),p_player_name:player,p_character_name:character,p_class_name:className,
     p_spec:spec,p_role:role,p_item_level:ilvl
