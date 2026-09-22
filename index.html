@@ -3768,17 +3768,15 @@ const SUPABASE_URL = "https://lljhicrxjhfmddclyjme.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_sS-deTm_y0JaocBmRo8DvQ_hUBY1QyY";
 
 const wowClasses={
- "Todesritter":[["Blut","Tank"],["Frost","DD"],["Unheilig","DD"]],
- "Druide":[["Gleichgewicht","DD"],["Wildheit","DD"],["Wächter","Tank"],["Wiederherstellung","Heiler"]],
- "Jäger":[["Tierherrschaft","DD"],["Treffsicherheit","DD"],["Überleben","DD"]],
- "Magier":[["Arkan","DD"],["Feuer","DD"],["Frost","DD"]],
- "Mönch":[["Braumeister","Tank"],["Nebelwirker","Heiler"],["Windläufer","DD"]],
+ "Krieger":[["Waffen","DD"],["Furor","DD"],["Schutz","Tank"]],
  "Paladin":[["Heilig","Heiler"],["Schutz","Tank"],["Vergeltung","DD"]],
- "Priester":[["Disziplin","Heiler"],["Heilig","Heiler"],["Schatten","DD"]],
+ "Jäger":[["Tierherrschaft","DD"],["Treffsicherheit","DD"],["Überleben","DD"]],
  "Schurke":[["Meucheln","DD"],["Kampf","DD"],["Täuschung","DD"]],
+ "Priester":[["Disziplin","Heiler"],["Heilig","Heiler"],["Schatten","DD"]],
  "Schamane":[["Elementar","DD"],["Verstärkung","DD"],["Wiederherstellung","Heiler"]],
+ "Magier":[["Arkan","DD"],["Feuer","DD"],["Frost","DD"]],
  "Hexenmeister":[["Gebrechen","DD"],["Dämonologie","DD"],["Zerstörung","DD"]],
- "Krieger":[["Waffen","DD"],["Furor","DD"],["Schutz","Tank"]]
+ "Druide":[["Gleichgewicht","DD"],["Wildheit","DD"],["Wiederherstellung","Heiler"]]
 };
 
 let supabaseClient=null;
@@ -5305,7 +5303,7 @@ function roleClass(role){
   return role==="Tank"?"rk-role-tank":role==="Heiler"?"rk-role-heiler":"rk-role-dd";
 }
 function classClass(name){
-  const map={"Todesritter":"rk-class-dk","Druide":"rk-class-druid","Jäger":"rk-class-hunter","Magier":"rk-class-mage","Mönch":"rk-class-monk","Paladin":"rk-class-paladin","Priester":"rk-class-priest","Schamane":"rk-class-shaman","Schurke":"rk-class-rogue","Hexenmeister":"rk-class-warlock","Krieger":"rk-class-warrior"};
+  const map={"Krieger":"rk-class-warrior","Paladin":"rk-class-paladin","Jäger":"rk-class-hunter","Schurke":"rk-class-rogue","Priester":"rk-class-priest","Schamane":"rk-class-shaman","Magier":"rk-class-mage","Hexenmeister":"rk-class-warlock","Druide":"rk-class-druid"};
   return map[name]||"";
 }
 
@@ -5395,9 +5393,9 @@ function openRaidkaderForm(playerName="", mode="create"){
          <label for="rkClass">Klasse *</label>
         <select id="rkClass" onchange="updateRaidkaderSpecs()">
           <option value="">Klasse wählen</option>
-          <option>Todesritter</option><option>Druide</option><option>Jäger</option><option>Magier</option>
-          <option>Mönch</option><option>Paladin</option><option>Priester</option><option>Schamane</option>
-          <option>Schurke</option><option>Hexenmeister</option><option>Krieger</option>
+          <option>Krieger</option><option>Paladin</option><option>Jäger</option><option>Schurke</option>
+          <option>Priester</option><option>Schamane</option><option>Magier</option><option>Hexenmeister</option>
+          <option>Druide</option>
         </select>
       </div>
       <div class="form-group">
