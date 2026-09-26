@@ -1248,9 +1248,78 @@ nav{
 .roster-stat-copy{overflow:visible;}
 </style>
 
+<style id="kk-header-atmosphere">
+/* KINDSKÖPFE – reine Header-Atmosphäre. Inhalt/Layout/JS bleiben unverändert. */
+.hero{isolation:isolate;}
+.hero > div:not(.kk-atmosphere){position:relative;z-index:5;}
+.hero::before,.hero::after{pointer-events:none;}
+.kk-atmosphere{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
+.kk-atmosphere .kk-mist{position:absolute;left:-15%;width:130%;height:42%;border-radius:50%;filter:blur(28px);opacity:.20;mix-blend-mode:screen;transform:translate3d(0,0,0);}
+.kk-atmosphere .mist-a{top:25%;background:radial-gradient(ellipse at 50% 50%,rgba(205,220,235,.22),rgba(130,160,185,.10) 35%,transparent 72%);animation:kkMistA 26s ease-in-out infinite alternate;}
+.kk-atmosphere .mist-b{top:47%;height:34%;opacity:.15;background:radial-gradient(ellipse at 50% 50%,rgba(230,215,180,.18),rgba(105,125,150,.08) 38%,transparent 72%);animation:kkMistB 34s ease-in-out infinite alternate;}
+.kk-atmosphere .mist-c{top:8%;height:30%;opacity:.11;background:radial-gradient(ellipse at 50% 50%,rgba(170,205,220,.16),transparent 70%);animation:kkMistC 41s ease-in-out infinite alternate;}
+.kk-atmosphere .kk-light{position:absolute;width:38vw;height:38vw;max-width:560px;max-height:560px;border-radius:50%;filter:blur(55px);opacity:.10;}
+.kk-atmosphere .light-a{left:8%;top:-22%;background:radial-gradient(circle,rgba(115,215,232,.55),transparent 68%);animation:kkGlowA 19s ease-in-out infinite alternate;}
+.kk-atmosphere .light-b{right:4%;top:10%;background:radial-gradient(circle,rgba(246,201,93,.38),transparent 68%);animation:kkGlowB 23s ease-in-out infinite alternate;}
+.kk-atmosphere .kk-particles{position:absolute;inset:0;overflow:hidden;}
+.kk-atmosphere .kk-particles i{position:absolute;display:block;width:var(--s);height:var(--s);left:var(--x);top:var(--y);border-radius:50%;background:rgba(255,224,140,var(--o));box-shadow:0 0 calc(var(--s)*3) rgba(246,201,93,.55);animation:kkParticle var(--d) ease-in-out infinite var(--delay);}
+.kk-atmosphere .kk-particles i:nth-child(3n){width:2px;height:2px;}
+.kk-atmosphere .kk-particles i:nth-child(4n){filter:blur(.7px);}
+.kk-film{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");mix-blend-mode:soft-light;}
+@keyframes kkMistA{from{transform:translateX(-5%) scale(1.05)}to{transform:translateX(7%) scale(1.16)}}
+@keyframes kkMistB{from{transform:translateX(7%) scale(1.12)}to{transform:translateX(-8%) scale(1.03)}}
+@keyframes kkMistC{from{transform:translateX(4%) scale(1)}to{transform:translateX(-5%) scale(1.12)}}
+@keyframes kkGlowA{from{transform:translate(0,0) scale(.9);opacity:.07}to{transform:translate(8%,10%) scale(1.12);opacity:.13}}
+@keyframes kkGlowB{from{transform:translate(0,0) scale(.9);opacity:.06}to{transform:translate(-10%,8%) scale(1.12);opacity:.12}}
+@keyframes kkParticle{0%,100%{transform:translate3d(0,12px,0);opacity:.18}35%{opacity:var(--o)}65%{transform:translate3d(var(--drift),-26px,0);opacity:calc(var(--o) * .72)} }
+@media (prefers-reduced-motion:reduce){.kk-atmosphere .kk-mist,.kk-atmosphere .kk-light,.kk-atmosphere .kk-particles i{animation:none!important}.kk-atmosphere .kk-particles i{opacity:.55!important}}
+</style>
+
+<style id="kk-header-atmosphere-fullwidth-fix">
+/* Header-Atmosphäre wirklich über die komplette Hero-Fläche */
+.hero{position:relative!important;isolation:isolate!important;overflow:hidden!important;}
+.hero > .kk-atmosphere{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  z-index:3!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+}
+.hero > .kk-atmosphere .kk-mist,
+.hero > .kk-atmosphere .kk-light{z-index:1!important;}
+.hero > .kk-atmosphere .kk-particles{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  z-index:3!important;
+  overflow:hidden!important;
+}
+.hero > .kk-atmosphere .kk-particles i{
+  position:absolute!important;
+  display:block!important;
+  left:var(--x)!important;
+  top:var(--y)!important;
+}
+.hero > .kk-atmosphere .kk-film{z-index:4!important;}
+.hero > .hero-content{position:relative!important;z-index:10!important;}
+.hero::before,.hero::after{z-index:1!important;pointer-events:none!important;}
+</style>
 </head>
 <body>
-<header class="hero"><div class="hero-content">
+<header class="hero"><div class="kk-atmosphere" aria-hidden="true">
+  <div class="kk-mist mist-a"></div><div class="kk-mist mist-b"></div><div class="kk-mist mist-c"></div>
+  <div class="kk-light light-a"></div><div class="kk-light light-b"></div>
+  <div class="kk-particles">
+    <i style="--x:7%;--y:67%;--s:3px;--o:.65;--d:8s;--delay:-2s;--drift:18px"></i><i style="--x:13%;--y:39%;--s:2px;--o:.38;--d:11s;--delay:-7s;--drift:-14px"></i><i style="--x:19%;--y:74%;--s:4px;--o:.55;--d:13s;--delay:-4s;--drift:21px"></i><i style="--x:26%;--y:53%;--s:2px;--o:.72;--d:9s;--delay:-6s;--drift:-18px"></i><i style="--x:32%;--y:28%;--s:3px;--o:.42;--d:14s;--delay:-3s;--drift:16px"></i><i style="--x:38%;--y:69%;--s:2px;--o:.58;--d:10s;--delay:-8s;--drift:-22px"></i><i style="--x:44%;--y:44%;--s:4px;--o:.48;--d:15s;--delay:-5s;--drift:19px"></i><i style="--x:50%;--y:77%;--s:2px;--o:.78;--d:12s;--delay:-9s;--drift:-15px"></i><i style="--x:56%;--y:34%;--s:3px;--o:.45;--d:9s;--delay:-1s;--drift:23px"></i><i style="--x:62%;--y:61%;--s:2px;--o:.66;--d:14s;--delay:-10s;--drift:-19px"></i><i style="--x:68%;--y:25%;--s:4px;--o:.40;--d:11s;--delay:-5s;--drift:17px"></i><i style="--x:74%;--y:71%;--s:2px;--o:.70;--d:13s;--delay:-2s;--drift:-21px"></i><i style="--x:80%;--y:48%;--s:3px;--o:.52;--d:10s;--delay:-7s;--drift:15px"></i><i style="--x:87%;--y:32%;--s:2px;--o:.62;--d:15s;--delay:-4s;--drift:-18px"></i><i style="--x:93%;--y:65%;--s:4px;--o:.44;--d:12s;--delay:-11s;--drift:20px"></i><i style="--x:10%;--y:18%;--s:2px;--o:.34;--d:16s;--delay:-9s;--drift:-12px"></i><i style="--x:23%;--y:59%;--s:3px;--o:.60;--d:11s;--delay:-6s;--drift:14px"></i><i style="--x:35%;--y:82%;--s:2px;--o:.48;--d:13s;--delay:-1s;--drift:-16px"></i><i style="--x:47%;--y:19%;--s:3px;--o:.55;--d:10s;--delay:-8s;--drift:18px"></i><i style="--x:59%;--y:73%;--s:2px;--o:.68;--d:14s;--delay:-3s;--drift:-14px"></i><i style="--x:71%;--y:56%;--s:3px;--o:.50;--d:12s;--delay:-10s;--drift:19px"></i><i style="--x:84%;--y:79%;--s:2px;--o:.73;--d:9s;--delay:-5s;--drift:-17px"></i>
+  </div>
+  <div class="kk-film"></div>
+</div>
+<div class="hero-content">
 <div class="hero-kicker">Allianz · Gilde · Raids · Zusammenhalt</div>
 <h1 class="hero-title">Kindsköpfe</h1><div class="hero-line"></div>
 <h2 class="hero-subtitle">Raidkader</h2>
