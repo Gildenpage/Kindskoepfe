@@ -75,8 +75,9 @@ background:linear-gradient(rgba(2,8,15,.25),rgba(2,7,13,.88)),radial-gradient(el
   pointer-events:none;
   mix-blend-mode:screen;
 }
-.hero-content{position:relative;z-index:2}
+.hero-content{position:relative;z-index:3}
 @media(max-width:700px){
+  .hero-video{opacity:.30;}
   .hero::before{
     width:120px !important;
     height:120px !important;
@@ -3723,7 +3724,29 @@ main > .raid-list-promo.raid-list-promo-wide{
 .hero{isolation:isolate;}
 .hero > div:not(.kk-atmosphere){position:relative;z-index:5;}
 .hero::before,.hero::after{pointer-events:none;}
-.kk-atmosphere{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
+.hero-video{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+  display:block;
+  object-fit:cover;
+  object-position:center center;
+  opacity:.46;
+  filter:saturate(.86) brightness(.82);
+  pointer-events:none;
+}
+.hero-video-overlay{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(2,8,15,.10),rgba(2,7,13,.38)),
+    radial-gradient(ellipse at center,rgba(7,16,26,.02),rgba(2,7,13,.22));
+}
+.kk-atmosphere{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
 .kk-atmosphere .kk-mist{position:absolute;left:-15%;width:130%;height:42%;border-radius:50%;filter:blur(28px);opacity:.20;mix-blend-mode:screen;transform:translate3d(0,0,0);}
 .kk-atmosphere .mist-a{top:25%;background:radial-gradient(ellipse at 50% 50%,rgba(205,220,235,.22),rgba(130,160,185,.10) 35%,transparent 72%);animation:kkMistA 26s ease-in-out infinite alternate;}
 .kk-atmosphere .mist-b{top:47%;height:34%;opacity:.15;background:radial-gradient(ellipse at 50% 50%,rgba(230,215,180,.18),rgba(105,125,150,.08) 38%,transparent 72%);animation:kkMistB 34s ease-in-out infinite alternate;}
@@ -3748,6 +3771,10 @@ main > .raid-list-promo.raid-list-promo-wide{
 </head>
 <body>
 <header class="hero">
+<video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+  <source src="header-video.mp4" type="video/mp4">
+</video>
+<div class="hero-video-overlay" aria-hidden="true"></div>
 <div class="kk-atmosphere" aria-hidden="true">
   <div class="kk-mist mist-a"></div><div class="kk-mist mist-b"></div><div class="kk-mist mist-c"></div>
   <div class="kk-light light-a"></div><div class="kk-light light-b"></div>
@@ -6821,4 +6848,13 @@ section,
     max-width:100%;
   }
 }
+
+/* Header video layering override */
+.hero{isolation:isolate;}
+.hero > .hero-video{z-index:0 !important;}
+.hero > .hero-video-overlay{z-index:1 !important;}
+.hero::before,.hero::after{z-index:2;}
+.hero > .kk-atmosphere{z-index:3 !important;}
+.hero > .hero-content{z-index:4 !important;}
+.hero-video{opacity:.46 !important;}
 </style>
