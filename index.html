@@ -3746,26 +3746,178 @@ main > .raid-list-promo.raid-list-promo-wide{
 </style>
 
 <style>
-
 .hero-video{
-  position:abs
-<video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-  <source src="header-video.mp4" type="video/mp4">
-</video>
-<div class="hero-video-overlay" aria-hidden="true"></div>
-olute; inset:0; width:100%; height:100%; z-index:0; display:block;
-  object-fit:cover; object-position:center center; opacity:.46;
-  filter:saturate(.86) brightness(.82); pointer-events:none;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+  display:block;
+  object-fit:cover;
+  object-position:center center;
+  opacity:.46;
+  filter:saturate(.86) brightness(.82);
+  pointer-events:none;
 }
 .hero-video-overlay{
-  position:absolute; inset:0; z-index:1; pointer-events:none;
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
   background:linear-gradient(180deg,rgba(2,8,15,.10),rgba(2,7,13,.38)),
              radial-gradient(ellipse at center,rgba(7,16,26,.02),rgba(2,7,13,.22));
 }
 </style>
+
+<style id="modern-navigation-final">
+/* Moderne Navigation */
+nav{
+  position:sticky;top:0;z-index:100;
+  padding:12px 16px;
+  background:rgba(5,10,16,.88);
+  backdrop-filter:blur(16px) saturate(135%);
+  -webkit-backdrop-filter:blur(16px) saturate(135%);
+  border-bottom:1px solid rgba(243,200,91,.18);
+  box-shadow:0 8px 30px rgba(0,0,0,.28);
+}
+.nav-main{gap:10px; padding:5px 8px; border:1px solid rgba(243,200,91,.12); border-radius:16px; background:linear-gradient(180deg,rgba(25,32,42,.78),rgba(10,15,22,.82)); box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 8px 25px rgba(0,0,0,.2);}
+.nav-main > button, .nav-admin button{
+  width:auto;height:44px;
+  min-width:154px;
+  padding:0 18px;
+  border-radius:12px;
+  border:1px solid rgba(160,180,195,.22);
+  background:linear-gradient(180deg,rgba(38,51,63,.92),rgba(20,29,38,.96));
+  color:#e7edf2;
+  font-weight:700;
+  letter-spacing:.2px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 3px 10px rgba(0,0,0,.18);
+  transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease;
+}
+.nav-main > button:hover{
+  transform:translateY(-2px);
+  background:linear-gradient(180deg,rgba(68,82,94,.98),rgba(30,40,49,.98));
+  border-color:rgba(243,200,91,.55);
+  color:#fff;
+  box-shadow:0 6px 18px rgba(0,0,0,.28),0 0 14px rgba(243,200,91,.08);
+}
+.nav-separator{width:1px;height:28px;margin:0 2px;background:linear-gradient(180deg,transparent,rgba(243,200,91,.55),transparent);box-shadow:none;}
+.nav-admin{margin-left:0!important;padding-left:0!important;border-left:0!important;}
+.nav-admin button{min-width:130px;background:linear-gradient(180deg,rgba(42,48,52,.95),rgba(24,29,33,.98));color:#d8e0e5;}
+.nav-admin button:hover{transform:translateY(-2px);background:linear-gradient(180deg,rgba(66,73,77,.98),rgba(30,35,39,.98))!important;border-color:rgba(243,200,91,.42)!important;color:#fff!important;}
+@media(max-width:700px){
+  nav{padding:9px 10px;}
+  .nav-main{width:100%;gap:7px;padding:6px;display:grid;grid-template-columns:1fr 1fr;}
+  .nav-main > button,.nav-admin button{width:100%;min-width:0;height:42px;padding:0 9px;font-size:13px;border-radius:10px;}
+  .nav-separator{display:none;}
+  .nav-admin{width:100%;grid-column:1 / -1;}
+  .nav-admin button{width:100%;}
+}
+</style>
+
+<style id="navigation-variants">
+/* ===== Ausgefallene Navigation: Quest / Runen / Banner ===== */
+.nav-main > button, .nav-admin button{position:relative;overflow:hidden;}
+.nav-main > button::after, .nav-admin button::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 25%,rgba(255,255,255,.12) 50%,transparent 75%);transform:translateX(-120%);transition:transform .55s ease;}
+.nav-main > button:hover::after, .nav-admin button:hover::after{transform:translateX(120%);}
+/* Variante A – Quest-UI */
+.nav-main{border-radius:14px;clip-path:polygon(0 0,98% 0,100% 20%,100% 80%,98% 100%,0 100%,2% 80%,2% 20%);}
+.nav-main > button{border-radius:8px 14px 8px 14px;text-transform:uppercase;font-size:12px;letter-spacing:.8px;}
+.nav-main > button:hover{box-shadow:0 0 20px rgba(243,200,91,.18),inset 0 0 12px rgba(243,200,91,.08);}
+/* Variante B – Runen */
+.nav-main::before{content:"✦ ᚱ ᛟ ᚨ ᛏ ᚾ ᛟ ᚱ ᚨ ᚾ ✦";display:block;position:absolute;left:18px;right:18px;top:-9px;text-align:center;color:rgba(243,200,91,.28);font-size:10px;letter-spacing:7px;pointer-events:none;}
+/* Variante C – Guild Banner */
+.nav-main > button:first-child,.nav-main > button:nth-child(2),.nav-main > button:nth-child(3){background:linear-gradient(180deg,rgba(50,43,31,.95),rgba(24,22,19,.98));border-color:rgba(243,200,91,.28);}
+.nav-admin button{border-radius:7px 16px 7px 16px;}
+@media(max-width:700px){.nav-main::before{display:none;}}
+</style>
+
+
+<style id="modern-clean-navbar">
+nav{position:sticky;top:0;z-index:1000;padding:14px 20px!important;background:rgba(8,11,16,.72)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:0!important;box-shadow:0 10px 35px rgba(0,0,0,.22)!important}
+.nav-main{width:min(980px,100%);margin:auto!important;padding:5px!important;display:flex!important;align-items:center;justify-content:center;gap:6px!important;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(20,24,31,.72);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 30px rgba(0,0,0,.18)}
+.nav-main>button,.nav-admin button{position:relative;width:auto!important;min-width:0!important;height:42px!important;padding:0 19px!important;border:0!important;border-radius:12px!important;background:transparent!important;color:#aeb7c2!important;font-size:13px!important;font-weight:700!important;letter-spacing:.15px;box-shadow:none!important;transition:color .2s,background .2s,transform .2s}
+.nav-main>button:hover,.nav-admin button:hover{transform:none!important;color:#fff!important;background:rgba(255,255,255,.07)!important}
+.nav-main>button::after,.nav-admin button::after{content:"";position:absolute;left:18px;right:18px;bottom:5px;height:2px;border-radius:2px;background:#d8ad4b;transform:scaleX(0);transition:transform .2s;box-shadow:0 0 12px rgba(216,173,75,.55)}
+.nav-main>button:hover::after{transform:scaleX(1)}
+.nav-separator{width:1px!important;height:22px!important;margin:0 4px!important;background:rgba(255,255,255,.09)!important}
+.nav-admin{margin-left:auto!important;padding-left:6px!important;border-left:1px solid rgba(255,255,255,.08)!important}
+.nav-admin button{padding:0 14px!important;color:#8f99a5!important}
+@media(max-width:700px){nav{padding:9px 8px!important}.nav-main{display:grid!important;grid-template-columns:repeat(3,1fr);gap:3px!important;padding:4px!important}.nav-main>button,.nav-admin button{width:100%!important;height:40px!important;padding:0 5px!important;font-size:11px!important}.nav-separator{display:none!important}.nav-admin{grid-column:1/-1;width:100%;margin:2px 0 0!important;padding:0!important;border-left:0!important;border-top:1px solid rgba(255,255,255,.07)!important}.nav-admin button{height:36px!important}}
+</style>
+
+<style id="kk-ultra-clean-nav">
+/* ===== Ultra Clean Navigation ===== */
+nav{
+  position:sticky!important;top:0;z-index:1000;
+  height:68px!important;min-height:68px!important;
+  padding:0 28px!important;
+  display:flex!important;align-items:center!important;
+  justify-content:center!important;
+  background:rgba(8,11,16,.78)!important;
+  border:0!important;
+  border-bottom:1px solid rgba(255,255,255,.07)!important;
+  backdrop-filter:blur(18px)!important;
+  -webkit-backdrop-filter:blur(18px)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.18)!important;
+}
+.nav-main{
+  width:100%!important;max-width:1180px!important;height:100%!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:4px!important;padding:0!important;border:0!important;background:transparent!important;
+  box-shadow:none!important;
+}
+.nav-main > button,
+.nav-admin button{
+  position:relative!important;
+  width:auto!important;min-width:0!important;height:68px!important;
+  padding:0 22px!important;margin:0!important;
+  border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+  color:rgba(235,239,243,.68)!important;
+  font-size:13px!important;font-weight:700!important;
+  letter-spacing:.8px!important;text-transform:uppercase!important;
+  transition:color .2s ease,transform .2s ease!important;
+}
+.nav-main > button::after,
+.nav-admin button::after{
+  content:"";position:absolute;left:18px;right:18px;bottom:0;height:2px;
+  background:linear-gradient(90deg,transparent,#d8ad4b,transparent);
+  transform:scaleX(0);transform-origin:center;
+  transition:transform .25s ease,opacity .25s ease;
+  opacity:0;
+}
+.nav-main > button:hover,
+.nav-admin button:hover{
+  color:#fff!important;transform:none!important;
+  background:transparent!important;border:0!important;
+  box-shadow:none!important;
+}
+.nav-main > button:hover::after,
+.nav-admin button:hover::after{transform:scaleX(1);opacity:.75}
+.nav-separator{display:none!important}
+.nav-admin{margin-left:18px!important;padding-left:18px!important;border-left:1px solid rgba(255,255,255,.09)!important;display:flex!important;align-items:center!important}
+.nav-admin button{padding:0 16px!important;color:rgba(235,239,243,.52)!important;font-size:12px!important}
+.nav-admin button::before{content:"";display:inline-block;width:7px;height:7px;margin-right:9px;border-radius:50%;background:#d8ad4b;box-shadow:0 0 10px rgba(216,173,75,.5)}
+@media(max-width:760px){
+ nav{height:auto!important;min-height:58px!important;padding:0 8px!important}
+ .nav-main{display:flex!important;flex-wrap:wrap!important;height:auto!important;gap:0!important}
+ .nav-main > button,.nav-admin button{height:54px!important;padding:0 10px!important;font-size:10px!important;letter-spacing:.45px!important}
+ .nav-main > button::after,.nav-admin button::after{left:8px;right:8px}
+ .nav-admin{margin-left:5px!important;padding-left:5px!important}
+ .nav-admin button{padding:0 8px!important}
+ .nav-admin button::before{width:6px;height:6px;margin-right:5px}
+}
+@media(max-width:430px){
+ .nav-main > button,.nav-admin button{padding:0 7px!important;font-size:9px!important}
+ .nav-admin{margin-left:2px!important;padding-left:2px!important}
+}
+</style>
+
 </head>
 <body>
 <header class="hero">
+<video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true"><source src="https://raw.githubusercontent.com/Gildenpage/Kindskoepfe/main/header-video.mp4" type="video/mp4"></video><div class="hero-video-overlay" aria-hidden="true"></div>
 <div class="kk-atmosphere" aria-hidden="true">
   <div class="kk-mist mist-a"></div><div class="kk-mist mist-b"></div><div class="kk-mist mist-c"></div>
   <div class="kk-light light-a"></div><div class="kk-light light-b"></div>
@@ -3782,7 +3934,7 @@ olute; inset:0; width:100%; height:100%; z-index:0; display:block;
 </div></header>
 <nav>
 <div class="nav-main">
-<button onclick="scrollToSection('news')">📰 News</button>
+
 <button onclick="scrollToSection('raids')">⚔️ Raidplaner</button>
 <button onclick="scrollToSection('events')">🎉 Eventplaner</button>
 <button onclick="window.location.href='raidkader.html'">👥 Raidkader</button>
