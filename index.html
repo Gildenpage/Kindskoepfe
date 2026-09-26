@@ -75,9 +75,8 @@ background:linear-gradient(rgba(2,8,15,.25),rgba(2,7,13,.88)),radial-gradient(el
   pointer-events:none;
   mix-blend-mode:screen;
 }
-.hero-content{position:relative;z-index:3}
+.hero-content{position:relative;z-index:2}
 @media(max-width:700px){
-  .hero-video{opacity:.30;}
   .hero::before{
     width:120px !important;
     height:120px !important;
@@ -3724,29 +3723,7 @@ main > .raid-list-promo.raid-list-promo-wide{
 .hero{isolation:isolate;}
 .hero > div:not(.kk-atmosphere){position:relative;z-index:5;}
 .hero::before,.hero::after{pointer-events:none;}
-.hero-video{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  z-index:0;
-  display:block;
-  object-fit:cover;
-  object-position:center center;
-  opacity:.46;
-  filter:saturate(.86) brightness(.82);
-  pointer-events:none;
-}
-.hero-video-overlay{
-  position:absolute;
-  inset:0;
-  z-index:1;
-  pointer-events:none;
-  background:
-    linear-gradient(180deg,rgba(2,8,15,.10),rgba(2,7,13,.38)),
-    radial-gradient(ellipse at center,rgba(7,16,26,.02),rgba(2,7,13,.22));
-}
-.kk-atmosphere{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
+.kk-atmosphere{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
 .kk-atmosphere .kk-mist{position:absolute;left:-15%;width:130%;height:42%;border-radius:50%;filter:blur(28px);opacity:.20;mix-blend-mode:screen;transform:translate3d(0,0,0);}
 .kk-atmosphere .mist-a{top:25%;background:radial-gradient(ellipse at 50% 50%,rgba(205,220,235,.22),rgba(130,160,185,.10) 35%,transparent 72%);animation:kkMistA 26s ease-in-out infinite alternate;}
 .kk-atmosphere .mist-b{top:47%;height:34%;opacity:.15;background:radial-gradient(ellipse at 50% 50%,rgba(230,215,180,.18),rgba(105,125,150,.08) 38%,transparent 72%);animation:kkMistB 34s ease-in-out infinite alternate;}
@@ -3768,13 +3745,27 @@ main > .raid-list-promo.raid-list-promo-wide{
 @media (prefers-reduced-motion:reduce){.kk-atmosphere .kk-mist,.kk-atmosphere .kk-light,.kk-atmosphere .kk-particles i{animation:none!important}.kk-atmosphere .kk-particles i{opacity:.55!important}}
 </style>
 
+<style>
+
+.hero-video{
+  position:abs
+<video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+  <source src="header-video-01-05-exakt.mp4" type="video/mp4">
+</video>
+<div class="hero-video-overlay" aria-hidden="true"></div>
+olute; inset:0; width:100%; height:100%; z-index:0; display:block;
+  object-fit:cover; object-position:center center; opacity:.46;
+  filter:saturate(.86) brightness(.82); pointer-events:none;
+}
+.hero-video-overlay{
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg,rgba(2,8,15,.10),rgba(2,7,13,.38)),
+             radial-gradient(ellipse at center,rgba(7,16,26,.02),rgba(2,7,13,.22));
+}
+</style>
 </head>
 <body>
 <header class="hero">
-<video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-  <source src="header-video.mp4" type="video/mp4">
-</video>
-<div class="hero-video-overlay" aria-hidden="true"></div>
 <div class="kk-atmosphere" aria-hidden="true">
   <div class="kk-mist mist-a"></div><div class="kk-mist mist-b"></div><div class="kk-mist mist-c"></div>
   <div class="kk-light light-a"></div><div class="kk-light light-b"></div>
@@ -3835,7 +3826,6 @@ main > .raid-list-promo.raid-list-promo-wide{
 </div>
 </div>
 <main>
-<section id="news"><div class="section-title"><h2>📰 Gilden-News</h2><button class="btn btn-primary admin-only" onclick="openNewsForm()">+ News erstellen</button></div><div class="news-section-layout"><div class="news-grid" id="newsContainer"></div></div></section>
 <section id="raids"><div class="section-title"><h2>⚔️ Raidplaner</h2><button class="btn btn-primary admin-only" onclick="openRaidForm()">+ Raid erstellen</button></div><div id="raidContainer"></div></section>
 <section id="events"><div class="section-title"><h2>🎉 Eventplaner</h2><button class="btn btn-primary admin-only" onclick="openEventForm()">+ Event erstellen</button></div><div id="eventContainer"></div></section>
 </main>
@@ -3951,14 +3941,13 @@ function dbError(error){console.error("Supabase-Fehler:",error);const msg=error?
 
 async function refreshData(){
  if(!supabaseClient)return;
- const [n,r,e,s] = await Promise.all([
-  supabaseClient.from("news").select("*").order("created_at",{ascending:false}),
+ const [r,e,s] = await Promise.all([
   supabaseClient.from("raids").select("*").order("date",{ascending:true}).order("time",{ascending:true}),
   supabaseClient.from("events").select("*").order("date",{ascending:true}).order("time",{ascending:true}),
   supabaseClient.rpc("get_public_signups")
  ]);
- for(const x of [n,r,e,s]) if(x.error){dbError(x.error);return;}
- news=n.data||[];raids=r.data||[];events=e.data||[];
+ for(const x of [r,e,s]) if(x.error){dbError(x.error);return;}
+ raids=r.data||[];events=e.data||[];
  const signups=(s.data||[]).map(p=>({...p,status:p.status||"confirmed"}));
  raids.forEach(x=>x.players=signups.filter(p=>p.item_type==="raid"&&p.item_id===x.id));
  events.forEach(x=>x.players=signups.filter(p=>p.item_type==="event"&&p.item_id===x.id));
@@ -3966,9 +3955,7 @@ async function refreshData(){
 }
 
 async function init(){
-  if(!initSupabase()){
-   document.getElementById("newsContainer").innerHTML='<div class="news-card"><h3>⚠️ Supabase noch nicht eingerichtet</h3><div class="news-text">Bitte SUPABASE_URL und SUPABASE_PUBLISHABLE_KEY im Script prüfen und anschließend die SQL-Datei im Supabase SQL Editor ausführen.</div></div>';
-   renderNews();renderRaids();renderEvents();renderAll();return;
+  if(!initSupabase()){ renderRaids();renderEvents();renderAll();return;
   }
   try{
     const {data:{session},error:sessionError}=await supabaseClient.auth.getSession();
@@ -3985,7 +3972,6 @@ async function init(){
   }catch(error){
     console.error(error);
     dbError(error);
-    document.getElementById("newsContainer").innerHTML='<div class="news-card"><h3>❌ Verbindung zu Supabase fehlgeschlagen</h3><div class="news-text">Prüfe URL/Publishable Key, ob das SQL erfolgreich ausgeführt wurde und ob die RLS-Policies vorhanden sind.</div></div>';
   }
 }
 async function updateAdminState(session){
@@ -4031,243 +4017,6 @@ async function loginAdmin(){
  await updateAdminState(data.session);
  if(isAdmin) showToast("🔐 Admin-Modus aktiviert.");
 }
-/* ===== NEWS ===== */
-function openNewsForm(id=null){
-  if(!isAdmin){alert("Nur der Admin kann News erstellen oder bearbeiten.");return;}
-  const n=id===null?null:news.find(x=>x.id===id);
-  if(id!==null&&!n)return;
-  openModal(`<h2>📰 ${n?"News bearbeiten":"News erstellen"}</h2>
-    <div class="form-group"><label>Überschrift *</label><input id="newsTitle" value="${n?escapeHTML(n.title):""}"></div>
-    <div class="form-group">
-      <label>Nachricht *</label>
-      <textarea id="newsText" placeholder="Text schreiben...&#10;&#10;Link: https://example.de&#10;Beschrifteter Link: [Zur Webseite](https://example.de)&#10;&#10;YouTube-Links werden automatisch als Videoplayer angezeigt.">${n?escapeHTML(n.text):""}</textarea>
-      <div class="news-editor-help">
-        <strong>🔗 Links:</strong> URL einfach einfügen – sie wird anklickbar.<br>
-        <strong>▶️ YouTube:</strong> YouTube-Links werden automatisch als Videoplayer eingebunden.
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
-      <button class="btn btn-primary" onclick="saveNews(${id===null?"null":id})">💾 ${n?"Änderungen speichern":"Veröffentlichen"}</button>
-    </div>`);
-}
-
-function getYouTubeId(url){
-  try{
-    const u=new URL(url.trim());
-    const host=u.hostname.toLowerCase().replace(/^www\./,'');
-    if(host==='youtu.be'){
-      return u.pathname.split('/').filter(Boolean)[0] || null;
-    }
-    if(host==='youtube.com' || host==='m.youtube.com'){
-      if(u.pathname==='/watch') return u.searchParams.get('v') || null;
-      if(u.pathname.startsWith('/shorts/')) return u.pathname.split('/').filter(Boolean)[1] || null;
-      if(u.pathname.startsWith('/embed/')) return u.pathname.split('/').filter(Boolean)[1] || null;
-    }
-  }catch(e){}
-  return null;
-}
-
-function safeNewsUrl(raw){
-  try{
-    const u=new URL(raw.trim());
-    return (u.protocol==='http:' || u.protocol==='https:') ? u.href : null;
-  }catch(e){return null;}
-}
-
-function renderNewsContent(raw){
-  // NEWS ONLY: URLs werden verarbeitet. YouTube-Player werden bewusst
-  // NICHT als HTML-String erzeugt, sondern später per DOM erstellt.
-  // Dadurch kann der iframe nicht versehentlich als Text erscheinen.
-  const source=String(raw ?? '');
-  const urlRegex=/(https?:\/\/[^\s<]+)/gi;
-  let html='';
-  let last=0;
-  let m;
-
-  while((m=urlRegex.exec(source))){
-    html += escapeHTML(source.slice(last,m.index));
-
-    let rawUrl=m[1];
-    let trailing='';
-    while(/[.,!?;:]$/.test(rawUrl)){
-      trailing=rawUrl.slice(-1)+trailing;
-      rawUrl=rawUrl.slice(0,-1);
-    }
-
-    const clean=safeNewsUrl(rawUrl);
-    const yt=clean ? getYouTubeId(clean) : null;
-
-    if(yt){
-      html += `
-        <div class="news-video" data-youtube-id="${escapeHTML(yt)}">
-          <div class="news-video-label">▶️ YouTube</div>
-          <div class="news-video-frame"></div>
-        </div>`;
-    }else if(clean){
-      html += `<a class="news-link" href="${escapeHTML(clean)}" target="_blank" rel="noopener noreferrer">${escapeHTML(clean)}</a>`;
-    }else{
-      html += escapeHTML(m[1]);
-    }
-
-    html += escapeHTML(trailing);
-    last=m.index+m[1].length;
-  }
-
-  html += escapeHTML(source.slice(last));
-  return html.replace(/\r?\n/g,'<br>');
-}
-
-function activateNewsYouTubePlayers(container){
-  container.querySelectorAll('.news-video[data-youtube-id]').forEach(card=>{
-    const id=card.getAttribute('data-youtube-id');
-    const frame=card.querySelector('.news-video-frame');
-    if(!id || !frame || frame.dataset.ready==='1') return;
-
-    // Bei einer lokal per file:// geöffneten HTML-Datei kann YouTube
-    // den Embed-Player mit Fehler 153 ablehnen. Das ist eine Einschränkung
-    // von YouTube, nicht der News-Funktion. Auf einer HTTPS-Seite wird
-    // unten immer der echte Player verwendet.
-    const isHttpPage = location.protocol === 'http:' || location.protocol === 'https:';
-
-    if(!isHttpPage){
-      frame.classList.add('news-video-local');
-      frame.innerHTML = `
-        <a class="news-video-preview" href="https://www.youtube.com/watch?v=${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer">
-          <img src="https://i.ytimg.com/vi/${encodeURIComponent(id)}/hqdefault.jpg" alt="YouTube Video Vorschau" loading="lazy">
-          <span class="news-video-play">▶</span>
-        </a>
-        <div class="news-video-local-note">Der direkte YouTube-Player funktioniert auf der veröffentlichten HTTPS-Seite.</div>`;
-      frame.dataset.ready='1';
-      return;
-    }
-
-    const iframe=document.createElement('iframe');
-    const origin = encodeURIComponent(location.origin);
-    iframe.src=`https://www.youtube.com/embed/${encodeURIComponent(id)}?rel=0&playsinline=1&origin=${origin}`;
-    iframe.title='YouTube Video';
-    iframe.loading='lazy';
-    iframe.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
-    iframe.setAttribute('allowfullscreen','');
-    // YouTube verlangt für eingebettete Wiedergabe einen HTTP-Referer.
-    iframe.referrerPolicy='strict-origin-when-cross-origin';
-
-    frame.appendChild(iframe);
-    frame.dataset.ready='1';
-  });
-}
-
-async function saveNews(id=null){
-  if(!isAdmin){alert("Admin-Sitzung ist nicht mehr aktiv. Bitte neu einloggen.");return;}
-  const title=document.getElementById("newsTitle")?.value.trim()||"";
-  const text=document.getElementById("newsText")?.value.trim()||"";
-  if(!title||!text){alert("Bitte alle Felder ausfüllen.");return;}
-  const payload={title,text};
-  const q=id===null
-    ?supabaseClient.from("news").insert(payload)
-    :supabaseClient.from("news").update(payload).eq("id",id);
-  const {error}=await q;
-  if(error){dbError(error);return;}
-  closeModal();
-  await refreshData();
-  showToast(id===null?"📰 News veröffentlicht.":"📰 News aktualisiert.");
-}
-async function deleteNews(id){
-  if(!isAdmin||!confirm("News wirklich löschen?"))return;
-  const {error}=await supabaseClient.from("news").delete().eq("id",id);
-  if(error){dbError(error);return;}
-  await refreshData();
-  showToast("News gelöscht.");
-}
-function getNewsYouTubeIds(raw){
-  const source=String(raw ?? '');
-  const urlRegex=/(https?:\/\/[^\s<]+)/gi;
-  const ids=[];
-  let m;
-
-  while((m=urlRegex.exec(source))){
-    let rawUrl=m[1];
-    while(/[.,!?;:]$/.test(rawUrl)) rawUrl=rawUrl.slice(0,-1);
-    const clean=safeNewsUrl(rawUrl);
-    const yt=clean ? getYouTubeId(clean) : null;
-    if(yt && !ids.includes(yt)) ids.push(yt);
-  }
-  return ids;
-}
-
-function renderNewsTextWithoutYouTube(raw){
-  const source=String(raw ?? '');
-  const urlRegex=/(https?:\/\/[^\s<]+)/gi;
-  let html='';
-  let last=0;
-  let m;
-
-  while((m=urlRegex.exec(source))){
-    html += escapeHTML(source.slice(last,m.index));
-
-    let rawUrl=m[1];
-    let trailing='';
-    while(/[.,!?;:]$/.test(rawUrl)){
-      trailing=rawUrl.slice(-1)+trailing;
-      rawUrl=rawUrl.slice(0,-1);
-    }
-
-    const clean=safeNewsUrl(rawUrl);
-    const yt=clean ? getYouTubeId(clean) : null;
-
-    if(yt){
-      // YouTube-URL nicht mehr im normalen Nachrichtentext anzeigen.
-    }else if(clean){
-      html += `<a class="news-link" href="${escapeHTML(clean)}" target="_blank" rel="noopener noreferrer">${escapeHTML(clean)}</a>`;
-    }else{
-      html += escapeHTML(m[1]);
-    }
-
-    if(!yt) html += escapeHTML(trailing);
-    last=m.index+m[1].length;
-  }
-
-  html += escapeHTML(source.slice(last));
-
-  return html
-    .replace(/(?:<br>\s*){3,}/g,'<br><br>')
-    .replace(/^(?:<br>\s*)+|(?:<br>\s*)+$/g,'')
-    .trim();
-}
-
-function renderNewsVideoBlocks(ids){
-  return ids.map(id=>`
-    <div class="news-video" data-youtube-id="${escapeHTML(id)}">
-      <div class="news-video-label">▶️ YouTube</div>
-      <div class="news-video-frame"></div>
-    </div>
-  `).join('');
-}
-
-function renderNews(){
-  const c=document.getElementById("newsContainer");
-  c.innerHTML="";
-  if(!news.length){c.innerHTML='<div class="news-card">Noch keine News vorhanden.</div>';return;}
-
-  news.forEach(n=>{
-    const youtubeIds=getNewsYouTubeIds(n.text);
-    const newsText=renderNewsTextWithoutYouTube(n.text);
-    const hasVideo=youtubeIds.length>0;
-
-    c.insertAdjacentHTML("beforeend",`<article class="news-card${hasVideo?' has-news-video':''}">
-      <h3>${escapeHTML(n.title)}</h3>
-      <div class="news-date">${escapeHTML(new Date(n.created_at).toLocaleDateString("de-DE"))}</div>
-      ${hasVideo?renderNewsVideoBlocks(youtubeIds):''}
-      ${newsText?`<div class="news-text">${newsText}</div>`:''}
-      ${isAdmin?`<br>
-        <button class="btn btn-secondary btn-small" onclick="openNewsForm(${n.id})">✏️ Bearbeiten</button>
-        <button class="btn btn-danger btn-small" onclick="deleteNews(${n.id})">🗑️ Löschen</button>`:""}
-    </article>`);
-  });
-
-  activateNewsYouTubePlayers(c);
-}
-
 /* ===== RAIDS ===== */
 function openRaidForm(id=null){
  if(!isAdmin){alert("Nur der Admin kann Raids erstellen.");return;}const r=id===null?null:raids.find(x=>x.id===id);if(id!==null&&!r)return;
@@ -5947,7 +5696,7 @@ async function adminDeleteRaidkader(id){
   await loadRaidkader();showToast("👑 Raidkader-Eintrag gelöscht.");
 }
 
-function renderAll(){renderNews();renderRaids();renderEvents();updateAdminStatus();setTimeout(()=>loadRaidkader(),0);}
+function renderAll(){renderRaids();renderEvents();updateAdminStatus();setTimeout(()=>loadRaidkader(),0);}
 renderAll();init();updateCountdowns();handleSectionNavigation();setInterval(updateCountdowns,1000);
   updateRaidProfileLoginUI();
 </script>
@@ -6848,13 +6597,4 @@ section,
     max-width:100%;
   }
 }
-
-/* Header video layering override */
-.hero{isolation:isolate;}
-.hero > .hero-video{z-index:0 !important;}
-.hero > .hero-video-overlay{z-index:1 !important;}
-.hero::before,.hero::after{z-index:2;}
-.hero > .kk-atmosphere{z-index:3 !important;}
-.hero > .hero-content{z-index:4 !important;}
-.hero-video{opacity:.46 !important;}
 </style>
