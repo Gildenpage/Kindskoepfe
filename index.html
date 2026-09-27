@@ -42,6 +42,24 @@ background:radial-gradient(circle at 50% 0%,#263e52 0,#0c141e 38%,#04070b 85%)}
 button{cursor:pointer;font:inherit} .hero{min-height:430px;display:grid;place-items:center;text-align:center;
 border-bottom:2px solid var(--gold);position:relative;overflow:hidden;
 background:linear-gradient(rgba(2,8,15,.25),rgba(2,7,13,.88)),radial-gradient(ellipse at 50% 35%,rgba(91,154,204,.55),transparent 55%),linear-gradient(135deg,#07101a,#1b3b58,#07101a)}
+.hero-video{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+  opacity:.58;
+  filter:saturate(.9) contrast(1.02);
+  pointer-events:none;
+}
+.hero-video-overlay{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:linear-gradient(180deg,rgba(2,8,15,.18),rgba(2,7,13,.68));
+  pointer-events:none;
+}
 .hero {
     width: 100%;
     min-height: 430px;
@@ -3942,6 +3960,10 @@ main > .raid-list-promo.raid-list-promo-wide{
 </head>
 <body>
 <header class="hero">
+<video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+  <source src="https://raw.githubusercontent.com/Gildenpage/Kindskoepfe/main/header-video.mp4" type="video/mp4">
+</video>
+<div class="hero-video-overlay" aria-hidden="true"></div>
 <div class="kk-atmosphere" aria-hidden="true">
   <div class="kk-mist mist-a"></div><div class="kk-mist mist-b"></div><div class="kk-mist mist-c"></div>
   <div class="kk-light light-a"></div><div class="kk-light light-b"></div>
@@ -6755,5 +6777,301 @@ section,
   nav button{
     max-width:100%;
   }
+}
+</style>
+
+<style id="kindskopfe-mobile-premium-final">
+/* =========================================================
+   KINDsköpfe – MOBILE PREMIUM LAYOUT
+   Header / Video / Navigation / Raidplaner / Eventplaner
+   ========================================================= */
+@media (max-width: 700px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  body{background:#070c12}
+
+  /* HEADER: Video füllt die komplette Fläche – keine dunklen Streifen */
+  .hero{
+    min-height:clamp(300px,72vw,390px)!important;
+    height:clamp(300px,72vw,390px)!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    border-bottom:1px solid rgba(216,173,75,.72)!important;
+    background:#071019!important;
+    isolation:isolate;
+  }
+  .hero-video{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    min-width:100%!important;
+    min-height:100%!important;
+    object-fit:cover!important;
+    object-position:center center!important;
+    opacity:.82!important;
+    filter:saturate(1.02) contrast(1.04)!important;
+    z-index:0!important;
+    background:#071019!important;
+  }
+  .hero-video-overlay{
+    inset:0!important;
+    z-index:1!important;
+    background:linear-gradient(180deg,rgba(2,7,13,.08) 0%,rgba(2,7,13,.16) 52%,rgba(2,7,13,.28) 100%)!important;
+  }
+  .hero::after{display:none!important}
+  .hero::before{z-index:2!important;opacity:.035!important;pointer-events:none!important}
+  .kk-atmosphere{z-index:2!important;opacity:.28!important;pointer-events:none!important}
+  .hero-content{
+    z-index:4!important;
+    width:100%!important;
+    padding:18px 14px!important;
+    transform:translateY(3px);
+    text-shadow:0 3px 16px rgba(0,0,0,.8);
+  }
+  .hero-kicker{
+    font-size:10px!important;
+    letter-spacing:1.5px!important;
+    line-height:1.35!important;
+    margin-bottom:7px!important;
+  }
+  .hero-title{
+    font-size:clamp(40px,13.5vw,58px)!important;
+    line-height:.98!important;
+    letter-spacing:2px!important;
+    margin:7px 0 0!important;
+  }
+  .hero-line{width:68%!important;margin:11px auto!important;height:1px!important}
+  .hero-subtitle{
+    font-size:clamp(15px,5vw,22px)!important;
+    letter-spacing:1.4px!important;
+    line-height:1.15!important;
+  }
+  .hero-description{
+    font-size:10px!important;
+    letter-spacing:1px!important;
+    margin:9px 0 0!important;
+  }
+
+  /* NAV: klar, kompakt, gut antippbar */
+  nav{
+    position:sticky!important;
+    top:0!important;
+    z-index:100!important;
+    width:100%!important;
+    padding:7px 8px 8px!important;
+    margin:0!important;
+    background:rgba(7,12,18,.94)!important;
+    backdrop-filter:blur(14px)!important;
+    -webkit-backdrop-filter:blur(14px)!important;
+    border-bottom:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:0 5px 20px rgba(0,0,0,.24)!important;
+  }
+  .nav-main{
+    width:100%!important;
+    max-width:520px!important;
+    margin:0 auto!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:6px!important;
+    align-items:stretch!important;
+  }
+  .nav-main > button,
+  .nav-admin button,
+  nav button{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:40px!important;
+    min-height:40px!important;
+    margin:0!important;
+    padding:6px 5px!important;
+    border:0!important;
+    border-radius:7px!important;
+    background:rgba(255,255,255,.045)!important;
+    color:rgba(239,243,246,.82)!important;
+    font-size:11px!important;
+    font-weight:700!important;
+    letter-spacing:.1px!important;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.045)!important;
+    transform:none!important;
+  }
+  .nav-main > button:hover,
+  .nav-admin button:hover,
+  nav button:hover{
+    background:rgba(255,255,255,.075)!important;
+    color:#fff!important;
+    transform:none!important;
+  }
+  .nav-main > button::after,
+  .nav-admin button::after{
+    left:18px!important;
+    right:18px!important;
+    bottom:1px!important;
+    height:1px!important;
+    box-shadow:none!important;
+  }
+  .nav-main > button:nth-child(1),
+  .nav-main > button:nth-child(2){
+    height:43px!important;
+    min-height:43px!important;
+    font-size:12px!important;
+    background:rgba(216,173,75,.08)!important;
+    box-shadow:inset 0 0 0 1px rgba(216,173,75,.10)!important;
+  }
+  .nav-main > button:nth-child(3){grid-column:1 / 2}
+  .nav-separator{display:none!important}
+  .nav-admin{
+    grid-column:1 / -1!important;
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:6px!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+  }
+  .nav-admin #navAddCharButton{grid-column:1 / -1!important}
+  .nav-admin button:last-child{grid-column:1 / -1!important}
+  #navLoginButton.nav-login-active{
+    color:#dff7e8!important;
+    background:rgba(76,200,125,.10)!important;
+    box-shadow:inset 0 0 0 1px rgba(76,200,125,.18)!important;
+  }
+
+  /* Inhalt beginnt direkt unter der Navigation */
+  main{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:13px 8px 30px!important;
+  }
+  section{
+    margin-bottom:18px!important;
+    scroll-margin-top:105px!important;
+  }
+  .section-title{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:8px!important;
+    margin:0 2px 8px!important;
+  }
+  .section-title h2{
+    margin:0!important;
+    font-size:20px!important;
+    line-height:1.15!important;
+  }
+  .section-title .btn{
+    width:auto!important;
+    min-height:34px!important;
+    padding:7px 9px!important;
+    font-size:10px!important;
+    white-space:nowrap!important;
+  }
+
+  /* Raid/Event-Karten: weniger Höhe, mehr Inhalt sichtbar */
+  .raid-card,
+  .event-card{
+    width:100%!important;
+    margin:0 0 12px!important;
+    border-radius:10px!important;
+    overflow:hidden!important;
+  }
+  .raid-card > .card-header,
+  .event-card > .card-header{
+    padding:13px 13px 12px!important;
+    gap:8px!important;
+  }
+  .raid-card > .card-header .card-title,
+  .event-card > .card-header .card-title{
+    font-size:18px!important;
+    line-height:1.18!important;
+    margin:0 0 6px!important;
+  }
+  .raid-card > .card-header .card-meta-modern,
+  .raid-card > .card-header .card-meta-clean,
+  .event-card > .card-header .card-meta-modern,
+  .event-card > .card-header .card-meta-clean{
+    font-size:11px!important;
+    line-height:1.35!important;
+  }
+  .card-body{
+    padding:11px!important;
+  }
+  .requirements,
+  .limit-box,
+  .role-limit-form,
+  .form-row{
+    gap:6px!important;
+  }
+  .requirements.raid-role-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:6px!important;
+    margin-bottom:8px!important;
+  }
+  .requirements > div,
+  .limit-box > div{
+    min-height:0!important;
+    padding:7px!important;
+  }
+
+  /* Spieler kompakt zweispaltig statt endlos untereinander */
+  .player-grid,
+  .raid-card .player-grid,
+  .event-card .player-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+  }
+  .raid-card .player-card,
+  .event-card .player-card{
+    width:100%!important;
+    height:126px!important;
+    min-height:126px!important;
+    padding:10px!important;
+    border-radius:8px!important;
+  }
+  .raid-card .player-card.admin-managed,
+  .event-card .player-card.admin-managed{
+    height:190px!important;
+    min-height:190px!important;
+  }
+  .player-card .player-name{font-size:13px!important;line-height:1.15!important}
+  .player-card .player-character{font-size:11px!important;line-height:1.2!important}
+  .player-card .player-info-row{gap:1px!important;padding-top:4px!important}
+  .player-card .player-role-chip,
+  .player-card .player-gs-chip{font-size:10px!important;line-height:15px!important}
+  .empty-slot{min-height:86px!important;padding:8px!important}
+  .empty-slot .free-slot-watermark{font-size:40px!important}
+
+  /* Event: Statusbereiche kompakt */
+  .event-card .status-groups{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:6px!important;
+  }
+  .event-card .status-group.absent{grid-column:1 / -1!important}
+  .event-card .status-group{padding:7px!important}
+  .event-card .status-group h4{font-size:11px!important;margin-bottom:5px!important}
+
+  /* Kein unnötiger Leerraum unter den Planern */
+  #raidContainer > *:last-child,
+  #eventContainer > *:last-child{margin-bottom:0!important}
+}
+
+@media (max-width:430px){
+  .hero{min-height:290px!important;height:290px!important}
+  .hero-content{padding:14px 10px!important}
+  .hero-title{font-size:40px!important}
+  .hero-subtitle{font-size:15px!important}
+  .hero-description{font-size:9px!important}
+  nav{padding:6px 6px 7px!important}
+  .nav-main,.nav-admin{gap:5px!important}
+  .nav-main > button,.nav-admin button,nav button{height:38px!important;min-height:38px!important;font-size:10.5px!important}
+  .nav-main > button:nth-child(1),.nav-main > button:nth-child(2){height:40px!important;min-height:40px!important;font-size:11px!important}
+  main{padding-left:6px!important;padding-right:6px!important}
+  .section-title h2{font-size:18px!important}
+  .section-title .btn{font-size:9px!important;padding:6px 7px!important}
+  .raid-card .player-card,.event-card .player-card{height:120px!important;min-height:120px!important}
 }
 </style>
