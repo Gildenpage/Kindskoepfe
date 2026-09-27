@@ -3980,8 +3980,6 @@ main > .raid-list-promo.raid-list-promo-wide{
 </div></header>
 <nav>
 <div class="nav-main">
-<button onclick="scrollToSection('raids')">⚔️ Raidplaner</button>
-<button onclick="scrollToSection('events')">🎉 Eventplaner</button>
 <button onclick="window.location.href='raidkader.html'">👥 Raidkader</button>
 <span aria-hidden="true" class="nav-separator"></span>
 <div class="nav-admin">
@@ -3993,9 +3991,22 @@ main > .raid-list-promo.raid-list-promo-wide{
 </div>
 </nav>
 <main>
+<section id="plannerWindow" class="planner-window">
+  <div class="planner-switcher" role="tablist" aria-label="Planer auswählen">
+    <button id="plannerTabRaids" class="planner-tab active" role="tab" aria-selected="true" onclick="switchPlanner('raids')">⚔️ Raidplaner</button>
+    <button id="plannerTabEvents" class="planner-tab" role="tab" aria-selected="false" onclick="switchPlanner('events')">🎉 Eventplaner</button>
+  </div>
 
-<section id="raids"><div class="section-title"><h2>⚔️ Raidplaner</h2><button class="btn btn-primary admin-only" onclick="openRaidForm()">+ Raid erstellen</button></div><div id="raidContainer"></div></section>
-<section id="events"><div class="section-title"><h2>🎉 Eventplaner</h2><button class="btn btn-primary admin-only" onclick="openEventForm()">+ Event erstellen</button></div><div id="eventContainer"></div></section>
+  <section id="raids" class="planner-panel active" role="tabpanel" aria-labelledby="plannerTabRaids">
+    <div class="section-title"><h2>⚔️ Raidplaner</h2><button class="btn btn-primary admin-only" onclick="openRaidForm()">+ Raid erstellen</button></div>
+    <div id="raidContainer"></div>
+  </section>
+
+  <section id="events" class="planner-panel" role="tabpanel" aria-labelledby="plannerTabEvents" hidden>
+    <div class="section-title"><h2>🎉 Eventplaner</h2><button class="btn btn-primary admin-only" onclick="openEventForm()">+ Event erstellen</button></div>
+    <div id="eventContainer"></div>
+  </section>
+</section>
 </main>
 <footer><strong>Kindsköpfe</strong><br/><br/>Raid und Event Portal</footer>
 <div class="admin-status" id="adminStatus">🔐 Admin-Modus aktiv</div><div class="toast" id="toast"></div>
@@ -4057,9 +4068,32 @@ function getStartDate(item){
 
     return d;
 }
+function switchPlanner(type, shouldScroll=true){
+  const isRaid=type==='raids';
+  const raidPanel=document.getElementById('raids');
+  const eventPanel=document.getElementById('events');
+  const raidTab=document.getElementById('plannerTabRaids');
+  const eventTab=document.getElementById('plannerTabEvents');
+  if(!raidPanel||!eventPanel||!raidTab||!eventTab)return;
+
+  raidPanel.classList.toggle('active',isRaid);
+  eventPanel.classList.toggle('active',!isRaid);
+  raidPanel.hidden=!isRaid;
+  eventPanel.hidden=isRaid;
+  raidTab.classList.toggle('active',isRaid);
+  eventTab.classList.toggle('active',!isRaid);
+  raidTab.setAttribute('aria-selected',String(isRaid));
+  eventTab.setAttribute('aria-selected',String(!isRaid));
+
+  if(shouldScroll){
+    const el=document.getElementById('plannerWindow');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
 function scrollToSection(id){
+  if(id==='raids'||id==='events'){switchPlanner(id);return;}
   const el=document.getElementById(id);
-  if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+  if(el)el.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 // Navigation von Unterseiten: nach dem Laden zuverlässig zum gewünschten Bereich springen.
@@ -4068,8 +4102,7 @@ function handleSectionNavigation(){
   const section=params.get("section") || (window.location.hash ? window.location.hash.slice(1) : "");
   if(!section || !["raids","events"].includes(section)) return;
   setTimeout(()=>{
-    const el=document.getElementById(section);
-    if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+    switchPlanner(section);
   },120);
 }
 function openModal(html){const box=document.querySelector("#modal .modal-box");box.classList.toggle("rk-wide-modal",html.includes("rk-modal"));document.getElementById("modalContent").innerHTML=html;document.getElementById("modal").classList.add("active");}
@@ -5877,7 +5910,15 @@ async function adminDeleteRaidkader(id){
   await loadRaidkader();showToast("👑 Raidkader-Eintrag gelöscht.");
 }
 
-function renderAll(){renderRaids();renderEvents();updateAdminStatus();setTimeout(()=>loadRaidkader(),0);}
+function renderAll(){
+  renderRaids();
+  renderEvents();
+  updateAdminStatus();
+  // Der Raidplaner hat Vorrang, sobald mindestens ein Raid vorhanden ist.
+  // Gibt es keinen Raid, wird automatisch der Eventplaner zuerst angezeigt.
+  switchPlanner(raids.length ? "raids" : "events", false);
+  setTimeout(()=>loadRaidkader(),0);
+}
 renderAll();init();updateCountdowns();handleSectionNavigation();setInterval(updateCountdowns,1000);
   updateRaidProfileLoginUI();
 </script>
@@ -6004,6 +6045,79 @@ document.addEventListener('DOMContentLoaded',()=>{
   /* bewusst keine eigene Optik: alle visuellen Regeln kommen vom .raid-card */
 }
 </style>
+
+<style id="combined-raid-event-planner">
+/* Gemeinsames Fenster für Raid- und Eventplaner */
+.planner-window{
+  position:relative;
+  width:min(1400px,calc(100% - 30px));
+  margin:28px auto 0;
+  padding:0;
+  border:1px solid rgba(216,173,75,.34);
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(13,24,35,.96),rgba(7,13,20,.98));
+  box-shadow:0 18px 55px rgba(0,0,0,.28);
+  overflow:hidden;
+}
+.planner-switcher{
+  display:flex;
+  gap:8px;
+  padding:10px;
+  border-bottom:1px solid rgba(216,173,75,.24);
+  background:rgba(6,11,18,.86);
+}
+.planner-tab{
+  flex:1;
+  min-height:50px;
+  border:1px solid transparent;
+  border-radius:11px;
+  background:transparent;
+  color:#aeb9c3;
+  font-weight:800;
+  font-size:15px;
+  transition:.18s ease;
+}
+.planner-tab:hover{
+  color:#f0f3f5;
+  background:rgba(255,255,255,.045);
+}
+.planner-tab.active{
+  color:#17130a;
+  border-color:#e4bd59;
+  background:linear-gradient(180deg,#f0cf72,#c9962f);
+  box-shadow:0 5px 18px rgba(216,173,75,.2);
+}
+.planner-panel{padding:20px 22px 24px;margin:0!important;min-height:180px;}
+.planner-panel[hidden]{display:none!important;}
+.planner-panel .section-title{margin-top:0;}
+@media(max-width:700px){
+  .planner-window{width:calc(100% - 16px);border-radius:14px;}
+  .planner-switcher{padding:8px;gap:6px;}
+  .planner-tab{min-height:46px;font-size:13px;padding:8px 5px;}
+  .planner-panel{padding:14px 10px 18px;}
+}
+</style>
+
+<style id="raidkader-nav-wider">
+/* Raidkader bleibt funktional unverändert, erhält aber mehr Breite und einen etwas helleren Hintergrund. */
+main>.raid-list-promo{
+  width:100%;
+  max-width:none;
+  box-sizing:border-box;
+  background-color:rgba(255,255,255,.075);
+  background-blend-mode:screen;
+}
+</style>
+
+<style id="raidkader-button-adjustment">
+/* Raidkader-Navigationsbutton: breiter und weiße Schrift */
+nav button[onclick*="raidkader.html"] {
+  min-width: 180px;
+  color: #fff !important;
+  white-space: nowrap;
+}
+</style>
+
 </body>
 </html>
 <style>
@@ -7073,5 +7187,25 @@ section,
   .section-title h2{font-size:18px!important}
   .section-title .btn{font-size:9px!important;padding:6px 7px!important}
   .raid-card .player-card,.event-card .player-card{height:120px!important;min-height:120px!important}
+}
+</style>
+<style id="raidkader-nav-fix">
+/* Raidkader-Navigationsbutton: breiter und weiße Schrift */
+nav .nav-main > button:first-child{
+  width:260px !important;
+  color:#fff !important;
+  font-weight:700 !important;
+  background:#202a31 !important;
+  border-color:#59636a !important;
+}
+nav .nav-main > button:first-child:hover{
+  color:#fff !important;
+  background:#2b343a !important;
+  border-color:#d8ad4b !important;
+}
+@media(max-width:700px){
+  nav .nav-main > button:first-child{
+    width:calc((100% - 18px) / 4) !important;
+  }
 }
 </style>
