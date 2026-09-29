@@ -1949,7 +1949,7 @@ function profileForm(player="",mode="create",existing=null){
     </div>
     <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveProfile()">➕ Charakter hinzufügen</button></div>
   </div>`:`<h2>👤 Raidprofil hinzufügen</h2><p class="muted">Lege dein Spielerprofil einmalig an. Deinen PIN benötigst du später zur Verwaltung.</p><div class="profile-create-grid">
-    <div class="form-group"><label>Echter Name *</label><input id="pName" value="${esc(player)}" placeholder="z. B. Max"></div>
+    <div class="form-group profile-single"><label>Echter Name *</label><input id="pName" value="${esc(player)}" placeholder="z. B. Max"></div>
     <div class="form-group"><label>Vorname des Charakters *</label><input id="pCharFirst" value="${esc(splitForeverCharacterName(e.character_name).first)}" placeholder="z. B. Arthas"></div><div class="form-group"><label>Nachname des Charakters *</label><input id="pCharLast" value="${esc(splitForeverCharacterName(e.character_name).last)}" placeholder="z. B. Menethil"></div>
     <div class="form-group profile-single"><label>Klasse *</label><select id="pClass" onchange="updateSpecs('pClass','pSpec','pRole','pSpec2','pRole2')"><option value="">Klasse wählen</option>${Object.keys(classes).map(c=>`<option ${c===e.class_name?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
     <div class="form-group"><label>1. Spezialisierung *</label><select id="pSpec"><option value="">Zuerst Klasse wählen</option></select></div>
