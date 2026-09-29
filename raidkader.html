@@ -1949,7 +1949,7 @@ function profileForm(player="",mode="create",existing=null){
     </div>
     <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveProfile()">➕ Charakter hinzufügen</button></div>
   </div>`:`<h2>👤 Raidprofil hinzufügen</h2><p class="muted">Lege dein Spielerprofil einmalig an. Deinen PIN benötigst du später zur Verwaltung.</p><div class="profile-create-grid">
-    <div class="form-group profile-single"><label>Echter Name *</label><input id="pName" value="${esc(player)}" placeholder="z. B. Max"></div>
+    <div class="form-group"><label>Echter Name *</label><input id="pName" value="${esc(player)}" placeholder="z. B. Max"></div>
     <div class="form-group"><label>Vorname des Charakters *</label><input id="pCharFirst" value="${esc(splitForeverCharacterName(e.character_name).first)}" placeholder="z. B. Arthas"></div><div class="form-group"><label>Nachname des Charakters *</label><input id="pCharLast" value="${esc(splitForeverCharacterName(e.character_name).last)}" placeholder="z. B. Menethil"></div>
     <div class="form-group profile-single"><label>Klasse *</label><select id="pClass" onchange="updateSpecs('pClass','pSpec','pRole','pSpec2','pRole2')"><option value="">Klasse wählen</option>${Object.keys(classes).map(c=>`<option ${c===e.class_name?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
     <div class="form-group"><label>1. Spezialisierung *</label><select id="pSpec"><option value="">Zuerst Klasse wählen</option></select></div>
@@ -3521,46 +3521,45 @@ section,
 .hero > .kk-atmosphere .kk-particles i{display:block !important;visibility:visible !important;}
 .hero > .hero-content{z-index:100 !important;}
 </style>
-<style id="mobile-clean-final-fix">
-/* ===== FINAL MOBILE CLEANUP ===== */
-@media (max-width: 760px){
-  html,body{width:100%;max-width:100%;overflow-x:hidden!important}
-  nav{padding:8px!important;display:block!important;overflow:visible!important}
-  nav .nav-main{width:100%!important;display:grid!important;grid-template-columns:1fr!important;gap:7px!important;align-items:stretch!important}
-  nav .nav-main > button{width:100%!important;min-width:0!important;height:44px!important;min-height:44px!important;padding:0 10px!important;font-size:12px!important}
-  nav .nav-separator{display:none!important}
-  nav .nav-admin{width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin:0!important;padding:0!important;border:0!important}
-  nav .nav-admin button{width:100%!important;min-width:0!important;height:44px!important;min-height:44px!important;padding:0 7px!important;font-size:12px!important;white-space:normal!important;line-height:1.15!important}
 
-  .logged-profile-panel{width:100%!important;margin:0 0 12px!important}
-  .logged-profile-card{width:100%!important;max-width:100%!important;padding:14px!important}
-  .logged-profile-head{align-items:stretch!important;flex-direction:column!important;gap:10px!important}
-  .logged-profile-actions{width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
-  .logged-profile-actions .btn{width:100%!important;min-width:0!important;padding:8px 6px!important;font-size:12px!important}
-
-  main{width:100%!important;max-width:100%!important;padding-left:8px!important;padding-right:8px!important}
-  .modal{padding:8px!important;align-items:flex-start!important;overflow-y:auto!important}
-  .modal-box,.modal-box.rk-wide-modal{width:100%!important;max-width:100%!important;max-height:calc(100vh - 16px)!important;margin:0!important;padding:18px 15px!important;overflow-x:hidden!important;overflow-y:auto!important}
-  .rk-modal .modal-title{display:block!important;margin-bottom:15px!important}
-  .rk-modal .modal-title h2{font-size:23px!important;line-height:1.2!important}
-  .rk-modal .modal-title p{font-size:13px!important;line-height:1.4!important}
-  .rk-modal-grid{grid-template-columns:1fr!important;gap:12px!important}
-  .rk-modal .form-group{min-width:0!important}
-  .rk-modal .form-group label{font-size:13px!important;margin-bottom:6px!important}
-  .rk-modal .form-group input,.rk-modal .form-group select{width:100%!important;min-width:0!important;min-height:46px!important;padding:10px!important;font-size:16px!important}
-  .modal-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;margin-top:16px!important}
-  .modal-actions .btn{width:100%!important;min-width:0!important;min-height:44px!important;margin:0!important;padding:8px 7px!important;font-size:12px!important;white-space:normal!important}
-  .manage-list{max-width:100%!important;overflow:hidden!important}
-  .manage-item{align-items:flex-start!important;flex-direction:column!important;gap:9px!important}
-  .manage-item > div:last-child{width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
-  .manage-item > div:last-child .btn{width:100%!important;margin:0!important}
-  .rk-success-actions{display:grid!important;grid-template-columns:1fr!important}
+<style id="mobile-target-match-admin-final">
+/* FINAL: Der erste Navigationsbutton ist mobil optisch und in der Breite identisch zum Admin-Button. */
+@media (max-width:700px){
+  nav .nav-main > button:first-child{
+    grid-column:1 / -1 !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    height:40px !important;
+    min-height:40px !important;
+    max-height:40px !important;
+    margin:0 !important;
+    padding:6px 5px !important;
+    box-sizing:border-box !important;
+    border:0 !important;
+    border-radius:7px !important;
+    background:rgba(255,255,255,.045) !important;
+    color:rgba(239,243,246,.82) !important;
+    font-size:11px !important;
+    font-weight:700 !important;
+    line-height:1.15 !important;
+    white-space:normal !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.045) !important;
+    transform:none !important;
+  }
+  nav .nav-main > button:first-child:hover{
+    background:rgba(255,255,255,.075) !important;
+    color:#fff !important;
+  }
 }
 @media (max-width:430px){
-  nav .nav-admin{grid-template-columns:1fr 1fr!important}
-  nav .nav-main > button,nav .nav-admin button{font-size:11px!important}
-  .logged-profile-actions{grid-template-columns:1fr!important}
-  .modal-actions{grid-template-columns:1fr!important}
-  .modal-box,.modal-box.rk-wide-modal{padding:16px 12px!important}
+  nav .nav-main > button:first-child{
+    height:38px !important;
+    min-height:38px !important;
+    max-height:38px !important;
+    font-size:10.5px !important;
+  }
 }
 </style>
