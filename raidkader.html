@@ -498,7 +498,7 @@ th:nth-child(6),td:nth-child(6){text-align:center}.role{display:inline-block;min
 .rk-success-hint strong{color:var(--gold2)}
 .rk-success-actions{justify-content:center;margin-top:22px}
 .rk-success-actions .btn{min-width:130px}
-.add-character-title{display:flex;align-items:center;gap:8px;margin-bottom:8px !important}.add-character-player{color:#c7d0d7;font:600 13px Arial,Helvetica,sans-serif;letter-spacing:.3px;margin-bottom:16px}.add-character-player strong{color:var(--gold2)}.add-character-form .form-group{margin:10px 0 14px}.add-character-form .form-group label{font-size:13px}.muted{color:var(--muted);font-size:13px;line-height:1.5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.profile-create-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.profile-create-grid .profile-single{grid-column:1/-1}.form-group{margin:13px 0}.form-group label{display:block;margin-bottom:6px;color:#c6cdd2;font-size:13px}input,select{width:100%;padding:11px;border:1px solid #465460;border-radius:5px;background:#0b1117;color:#fff;outline:none}input:focus,select:focus{border-color:var(--gold)}.modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:20px}.manage-list{display:grid;gap:8px;margin-top:15px}.manage-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;background:#0c141c;border:1px solid var(--border);border-radius:7px}.manage-item span{display:block;color:var(--muted);font-size:12px;margin-top:4px}.admin-status{display:none;position:fixed;right:15px;bottom:15px;z-index:100;padding:9px 13px;border-radius:5px;background:#2f7b43;font-size:12px;font-weight:bold}.admin-status.show{display:block}footer{padding:45px;text-align:center;border-top:1px solid var(--border);color:#777}footer strong{color:var(--gold)}
+.add-character-title{display:flex;align-items:center;gap:8px;margin-bottom:8px !important}.add-character-player{color:#c7d0d7;font:600 13px Arial,Helvetica,sans-serif;letter-spacing:.3px;margin-bottom:16px}.add-character-player strong{color:var(--gold2)} .add-character-form .form-group{margin:10px 0 14px}.add-character-form .form-group label{font-size:13px}.character-form-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 12px}.character-form-grid .field-full{grid-column:1/-1}.character-form-grid .field-pair{grid-column:auto}.character-form-grid .field-ilvl{grid-column:1/-1}@media(max-width:700px){.character-form-grid{grid-template-columns:1fr}.character-form-grid .field-full,.character-form-grid .field-ilvl{grid-column:auto}}.muted{color:var(--muted);font-size:13px;line-height:1.5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.profile-create-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.profile-create-grid .profile-single{grid-column:1/-1}.form-group{margin:13px 0}.form-group label{display:block;margin-bottom:6px;color:#c6cdd2;font-size:13px}input,select{width:100%;padding:11px;border:1px solid #465460;border-radius:5px;background:#0b1117;color:#fff;outline:none}input:focus,select:focus{border-color:var(--gold)}.modal-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:20px}.manage-list{display:grid;gap:8px;margin-top:15px}.manage-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;background:#0c141c;border:1px solid var(--border);border-radius:7px}.manage-item span{display:block;color:var(--muted);font-size:12px;margin-top:4px}.admin-status{display:none;position:fixed;right:15px;bottom:15px;z-index:100;padding:9px 13px;border-radius:5px;background:#2f7b43;font-size:12px;font-weight:bold}.admin-status.show{display:block}footer{padding:45px;text-align:center;border-top:1px solid var(--border);color:#777}footer strong{color:var(--gold)}
 @media(max-width:700px){
   .profile-create-grid{grid-template-columns:1fr}
   .profile-create-grid .profile-single{grid-column:auto}
@@ -1937,25 +1937,26 @@ function profileForm(player="",mode="create",existing=null){
     <h2 class="add-character-title">👤 ${esc(player)} → Charakter hinzufügen</h2>
     <div class="add-character-player">Füge deinem bestehenden Spielerprofil einen weiteren Charakter hinzu.</div>
     <input id="pName" type="hidden" value="${esc(player)}">
-    <div class="grid">
-      <div class="form-group"><label>Vorname des Charakters *</label><input id="pCharFirst" value="${esc(splitForeverCharacterName(e.character_name).first)}" placeholder="z. B. Dr"></div><div class="form-group"><label>Nachname des Charakters *</label><input id="pCharLast" value="${esc(splitForeverCharacterName(e.character_name).last)}" placeholder="z. B. Mett"></div>
-      <div class="form-group"><label>Klasse *</label><select id="pClass" onchange="updateSpecs('pClass','pSpec','pRole','pSpec2','pRole2')"><option value="">Klasse wählen</option>${Object.keys(classes).map(c=>`<option ${c===e.class_name?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
-      <div class="form-group"><label>1. Spezialisierung *</label><select id="pSpec"><option value="">Zuerst Klasse wählen</option></select></div>
-      <div class="form-group"><label>Rolle</label><select id="pRole" disabled><option>Automatisch</option></select></div>
-      <div class="form-group"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="pSpec2"><option value="">Keine Offspec</option></select></div>
-      <div class="form-group"><label>Offspec-Rolle</label><select id="pRole2" disabled><option>Automatisch</option></select></div>
-      <div class="form-group"><label>Gegenstandsstufe *</label><input id="pIlvl" type="number" min="1" max="999" value="${esc(e.item_level||"")}" placeholder="z. B. 553"></div>
+    <div class="character-form-grid">
+      <div class="form-group"><label>Vorname des Charakters *</label><input id="pCharFirst" value="${esc(splitForeverCharacterName(e.character_name).first)}" placeholder="z. B. Arthas"></div>
+      <div class="form-group"><label>Nachname des Charakters *</label><input id="pCharLast" value="${esc(splitForeverCharacterName(e.character_name).last)}" placeholder="z. B. Menethil"></div>
+      <div class="form-group field-full"><label>Klasse *</label><select id="pClass" onchange="updateSpecs('pClass','pSpec','pRole','pSpec2','pRole2')"><option value="">Klasse wählen</option>${Object.keys(classes).map(c=>`<option ${c===e.class_name?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
+      <div class="form-group field-pair"><label>1. Spezialisierung *</label><select id="pSpec"><option value="">Zuerst Klasse wählen</option></select></div>
+      <div class="form-group field-pair"><label>Rolle</label><select id="pRole" disabled><option>Automatisch</option></select></div>
+      <div class="form-group field-pair"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="pSpec2"><option value="">Keine Offspec</option></select></div>
+      <div class="form-group field-pair"><label>Offspec-Rolle</label><select id="pRole2" disabled><option>Automatisch</option></select></div>
+      <div class="form-group field-ilvl"><label>Gegenstandsstufe *</label><input id="pIlvl" type="number" min="1" max="999" value="${esc(e.item_level||"")}" placeholder="z. B. 20"></div>
     </div>
     <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveProfile()">➕ Charakter hinzufügen</button></div>
   </div>`:`<h2>👤 Raidprofil hinzufügen</h2><p class="muted">Lege dein Spielerprofil einmalig an. Deinen PIN benötigst du später zur Verwaltung.</p><div class="profile-create-grid">
-    <div class="form-group"><label>Spielername *</label><input id="pName" value="${esc(player)}" placeholder="z. B. Toni"></div>
-    <div class="form-group"><label>Vorname des Charakters *</label><input id="pCharFirst" value="${esc(splitForeverCharacterName(e.character_name).first)}" placeholder="z. B. Dr"></div><div class="form-group"><label>Nachname des Charakters *</label><input id="pCharLast" value="${esc(splitForeverCharacterName(e.character_name).last)}" placeholder="z. B. Mett"></div>
+    <div class="form-group"><label>Echter Name *</label><input id="pName" value="${esc(player)}" placeholder="z. B. Max"></div>
+    <div class="form-group"><label>Vorname des Charakters *</label><input id="pCharFirst" value="${esc(splitForeverCharacterName(e.character_name).first)}" placeholder="z. B. Arthas"></div><div class="form-group"><label>Nachname des Charakters *</label><input id="pCharLast" value="${esc(splitForeverCharacterName(e.character_name).last)}" placeholder="z. B. Menethil"></div>
     <div class="form-group profile-single"><label>Klasse *</label><select id="pClass" onchange="updateSpecs('pClass','pSpec','pRole','pSpec2','pRole2')"><option value="">Klasse wählen</option>${Object.keys(classes).map(c=>`<option ${c===e.class_name?"selected":""}>${esc(c)}</option>`).join("")}</select></div>
     <div class="form-group"><label>1. Spezialisierung *</label><select id="pSpec"><option value="">Zuerst Klasse wählen</option></select></div>
     <div class="form-group"><label>Rolle</label><select id="pRole" disabled><option>Automatisch</option></select></div>
     <div class="form-group"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="pSpec2"><option value="">Keine Offspec</option></select></div>
     <div class="form-group"><label>Offspec-Rolle</label><select id="pRole2" disabled><option>Automatisch</option></select></div>
-    <div class="form-group profile-single"><label>Gegenstandsstufe *</label><input id="pIlvl" type="number" min="1" max="999" value="${esc(e.item_level||"")}" placeholder="z. B. 553"></div>
+    <div class="form-group profile-single"><label>Gegenstandsstufe *</label><input id="pIlvl" type="number" min="1" max="999" value="${esc(e.item_level||"")}" placeholder="z. B. 20"></div>
     <div class="form-group profile-single"><label>Persönlicher PIN *</label><input id="pPin" type="password" inputmode="numeric" maxlength="20" autocomplete="new-password" placeholder="4–20 Ziffern"></div>
   </div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveProfile()">➕ Profil & Charakter speichern</button></div>`);
   if($("pClass").value){updateSpecs("pClass","pSpec","pRole","pSpec2","pRole2");if(e.spec)$("pSpec").value=e.spec;$("pSpec").onchange();if(getOffspec(e))$("pSpec2").value=getOffspec(e);$("pSpec2").onchange();}
@@ -2137,15 +2138,15 @@ function editMine(r){
   openModal(`<div class="add-character-form">
     <h2 class="add-character-title">✏️ Profil bearbeiten</h2>
     <div class="add-character-player">Bearbeite die Daten deines Charakters. Spielername und PIN bleiben unverändert.</div>
-    <div class="grid">
-      <div class="form-group"><label>Vorname des Charakters *</label><input id="eCharFirst" value="${esc(name.first)}" placeholder="z. B. Dr"></div>
-      <div class="form-group"><label>Nachname des Charakters *</label><input id="eCharLast" value="${esc(name.last)}" placeholder="z. B. Mett"></div>
-      <div class="form-group"><label>Klasse *</label><select id="eClass" onchange="updateSpecs('eClass','eSpec','eRole','eSpec2','eRole2')">${opts}</select></div>
-      <div class="form-group"><label>1. Spezialisierung *</label><select id="eSpec"></select></div>
-      <div class="form-group"><label>Rolle</label><select id="eRole" disabled><option>Automatisch</option></select></div>
-      <div class="form-group"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="eSpec2"></select></div>
-      <div class="form-group"><label>Offspec-Rolle</label><select id="eRole2" disabled><option>Automatisch</option></select></div>
-      <div class="form-group"><label>Gegenstandsstufe *</label><input id="eIlvl" type="number" min="1" max="999" value="${esc(r.item_level)}" placeholder="z. B. 553"></div>
+    <div class="character-form-grid">
+      <div class="form-group"><label>Vorname des Charakters *</label><input id="eCharFirst" value="${esc(name.first)}" placeholder="z. B. Arthas"></div>
+      <div class="form-group"><label>Nachname des Charakters *</label><input id="eCharLast" value="${esc(name.last)}" placeholder="z. B. Menethil"></div>
+      <div class="form-group field-full"><label>Klasse *</label><select id="eClass" onchange="updateSpecs('eClass','eSpec','eRole','eSpec2','eRole2')">${opts}</select></div>
+      <div class="form-group field-pair"><label>1. Spezialisierung *</label><select id="eSpec"></select></div>
+      <div class="form-group field-pair"><label>Rolle</label><select id="eRole" disabled><option>Automatisch</option></select></div>
+      <div class="form-group field-pair"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="eSpec2"></select></div>
+      <div class="form-group field-pair"><label>Offspec-Rolle</label><select id="eRole2" disabled><option>Automatisch</option></select></div>
+      <div class="form-group field-ilvl"><label>Gegenstandsstufe *</label><input id="eIlvl" type="number" min="1" max="999" value="${esc(r.item_level)}" placeholder="z. B. 20"></div>
     </div>
     <div class="modal-actions"><button class="btn btn-secondary" onclick="manage(managePlayer)">↩ Zurück</button><button class="btn btn-primary" onclick="saveMine(${r.id})">💾 Änderungen speichern</button></div>
   </div>`);
