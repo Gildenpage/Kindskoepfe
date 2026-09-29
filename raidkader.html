@@ -1652,6 +1652,24 @@ nav{
 .hero > .hero-wow-logo img, .hero-wow-logo img{width:100%!important;height:100%!important;}
 @media (max-width:600px){.hero > .hero-wow-logo, .hero-wow-logo{width:120px!important;height:120px!important;max-width:36vw!important;max-height:36vw!important;}}
 </style>
+
+<style id="raidkader-logged-profile-panel">
+/* Eingeloggtes Profil: exakt auf die Breite des normalen Seiteninhalts bringen. */
+.logged-profile-panel{width:100%;max-width:none;margin:0 0 22px}
+.logged-profile-card{background:linear-gradient(180deg,rgba(25,39,53,.96),rgba(10,18,27,.96));border:1px solid rgba(216,173,75,.55);border-radius:10px;box-shadow:0 10px 35px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.04);padding:18px 20px}
+.logged-profile-head{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.logged-profile-kicker{color:var(--gold2);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.logged-profile-head h2{margin:0;font:700 24px Georgia,serif;color:#f5f1df}
+.logged-profile-meta{color:var(--muted);font-size:13px;margin-top:4px}
+.logged-profile-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.logged-profile-actions .btn{min-height:42px}
+.logged-char-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin-top:15px}
+.logged-char-row{padding:10px 12px;border:1px solid rgba(255,255,255,.09);border-radius:7px;background:rgba(3,8,13,.38)}
+.logged-char-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.logged-char-main strong{color:#f1f3f5;font-size:14px}
+.logged-char-main span{color:#aebbc5;font-size:12px;white-space:normal}
+@media(max-width:700px){.logged-profile-panel{width:100%;margin:0 0 14px}.logged-profile-card{padding:15px}.logged-profile-head{align-items:stretch;flex-direction:column}.logged-profile-actions{justify-content:stretch}.logged-profile-actions .btn{flex:1 1 100%;width:100%}.logged-char-list{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <header class="hero">
@@ -1681,12 +1699,12 @@ nav{
 <div class="nav-admin">
 <button class="nav-manage" id="navLoginButton" onclick="handleNavLoginClick()">🔑 Login</button>
 <button class="nav-manage" id="navRegisterButton" onclick="openRaidkaderForm()">➕ Registrieren</button>
-<button class="nav-manage" id="navAddCharButton" onclick="openLoggedInRaidkaderManage()" style="display:none">👤 Raidkader Char hinzufügen</button>
 <button class="nav-manage" onclick="openAdminLogin()">🔐 Admin</button>
 </div>
 </div>
 </nav>
 <main>
+<section id="loggedInProfilePanel" class="logged-profile-panel" aria-live="polite" style="display:none"></section>
 <div class="titlebar">
 <div>
 <h2>👥 Event und Raidkader</h2>
@@ -1769,12 +1787,11 @@ function setupEnterSubmit(){
 /* Kompatibilität für die Index-Navigation im Raidkader */
 function updateRaidNavLoginState(){
   const b=document.getElementById("navLoginButton");
-  const add=document.getElementById("navAddCharButton");
   if(!b)return;
   const logged=!!(verifiedPlayer&&verifiedPin);
   b.classList.toggle("nav-login-active",logged);
   b.textContent=logged?"🔓 Abmelden":"🔑 Login";
-  if(add)add.style.display=logged?"inline-flex":"none";
+  renderLoggedInProfile();
 }
 async function handleNavLoginClick(){
   if(verifiedPlayer&&verifiedPin){
@@ -1816,7 +1833,26 @@ function openLoggedInRaidkaderManage(){
 
 async function load(){const {data,error}=await sb.from("raidkader").select("*").order("player_name").order("item_level",{ascending:false});if(error){$("roster").innerHTML='<div class="empty">Raidkader konnte nicht geladen werden.<br>'+esc(error.message)+'</div>';return}rows=data||[];render()}
 
+function renderLoggedInProfile(){
+  const panel=$("loggedInProfilePanel");
+  if(!panel)return;
+  const logged=!!(verifiedPlayer&&verifiedPin);
+  if(!logged){ panel.style.display="none"; panel.innerHTML=""; return; }
+  const player=String(verifiedPlayer||"").trim();
+  const mine=rows.filter(r=>String(r.player_name||"").trim().toLowerCase()===player.toLowerCase());
+  panel.style.display="block";
+  const chars=mine.map(r=>`<div class="logged-char-row"><div class="logged-char-main"><strong>${esc(r.character_name)}</strong><span>${esc(r.class_name)} · ${esc(r.spec)} · ${esc(r.role)} · GS ${esc(r.item_level)}</span></div></div>`).join("");
+  panel.innerHTML=`<div class="logged-profile-card">
+    <div class="logged-profile-head">
+      <div><div class="logged-profile-kicker">DEIN PROFIL</div><h2>👤 ${esc(player)}</h2><div class="logged-profile-meta">${mine.length} Charakter${mine.length===1?"":"e"} im Raidkader</div></div>
+      <div class="logged-profile-actions"><button class="btn btn-primary" onclick='addChar(${JSON.stringify(player)})'>➕ Charakter hinzufügen</button><button class="btn btn-secondary" onclick='manage(${JSON.stringify(player)})'>✏️ Charakter bearbeiten</button></div>
+    </div>
+    <div class="logged-char-list">${chars || '<div class="muted">Noch keine Charaktere im Raidkader.</div>'}</div>
+  </div>`;
+}
+
 function render(){
+  renderLoggedInProfile();
   const groups={};
   rows.forEach(r=>{
     const k=r.player_name.trim().toLowerCase();
@@ -1840,10 +1876,7 @@ function render(){
           <div class="player">👤 ${esc(g.name)}</div>
           <div class="meta">${g.rows.length} Charakter${g.rows.length===1?"":"e"} im Raidkader</div>
         </div>
-        <div class="actions">
-          <button class="btn btn-primary small" onclick='addChar(${JSON.stringify(g.name)})'>➕ Charakter hinzufügen</button>
-          <button class="btn btn-secondary small" onclick='manage(${JSON.stringify(g.name)})'>✏️ Meine Chars bearbeiten</button>
-        </div>
+        <div class="actions"></div>
       </div>
       <div class="table-wrap"><table><thead><tr>
         <th>Charakter</th><th>Klasse</th><th>Spec</th><th>Rolle</th><th>Offspec</th><th>OS/Rolle</th><th>GS</th><th>Verwaltung</th>
@@ -2100,14 +2133,30 @@ function openManageList(data){openModal(`<h2>👤 ${esc(managePlayer)} – Chara
 
 function editMine(r){
   const opts=Object.keys(classes).map(c=>`<option ${c===r.class_name?"selected":""}>${esc(c)}</option>`).join("");
-  openModal(`<h2>✏️ ${esc(r.character_name)} bearbeiten</h2><div class="grid"><div class="form-group"><label>Charaktername</label><input id="eChar" value="${esc(r.character_name)}"></div><div class="form-group"><label>Klasse</label><select id="eClass" onchange="updateSpecs('eClass','eSpec','eRole','eSpec2','eRole2')">${opts}</select></div><div class="form-group"><label>1. Spezialisierung</label><select id="eSpec"></select></div><div class="form-group"><label>Rolle</label><select id="eRole" disabled></select></div><div class="form-group"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="eSpec2"></select></div><div class="form-group"><label>Offspec-Rolle</label><select id="eRole2" disabled></select></div><div class="form-group"><label>Gegenstandsstufe</label><input id="eIlvl" type="number" min="1" max="999" value="${esc(r.item_level)}"></div></div><div class="modal-actions"><button class="btn btn-secondary" onclick="manage(managePlayer)">↩ Zurück</button><button class="btn btn-primary" onclick="saveMine(${r.id})">💾 Speichern</button></div>`);
+  const name=splitForeverCharacterName(r.character_name);
+  openModal(`<div class="add-character-form">
+    <h2 class="add-character-title">✏️ Profil bearbeiten</h2>
+    <div class="add-character-player">Bearbeite die Daten deines Charakters. Spielername und PIN bleiben unverändert.</div>
+    <div class="grid">
+      <div class="form-group"><label>Vorname des Charakters *</label><input id="eCharFirst" value="${esc(name.first)}" placeholder="z. B. Dr"></div>
+      <div class="form-group"><label>Nachname des Charakters *</label><input id="eCharLast" value="${esc(name.last)}" placeholder="z. B. Mett"></div>
+      <div class="form-group"><label>Klasse *</label><select id="eClass" onchange="updateSpecs('eClass','eSpec','eRole','eSpec2','eRole2')">${opts}</select></div>
+      <div class="form-group"><label>1. Spezialisierung *</label><select id="eSpec"></select></div>
+      <div class="form-group"><label>Rolle</label><select id="eRole" disabled><option>Automatisch</option></select></div>
+      <div class="form-group"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="eSpec2"></select></div>
+      <div class="form-group"><label>Offspec-Rolle</label><select id="eRole2" disabled><option>Automatisch</option></select></div>
+      <div class="form-group"><label>Gegenstandsstufe *</label><input id="eIlvl" type="number" min="1" max="999" value="${esc(r.item_level)}" placeholder="z. B. 553"></div>
+    </div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="manage(managePlayer)">↩ Zurück</button><button class="btn btn-primary" onclick="saveMine(${r.id})">💾 Änderungen speichern</button></div>
+  </div>`);
   updateSpecs("eClass","eSpec","eRole","eSpec2","eRole2");$("eSpec").value=r.spec;$("eSpec").onchange();const offspec=getOffspec(r);if(offspec)$("eSpec2").value=offspec;$("eSpec2").onchange();
 }
 async function saveMine(id){
-  const cl=$("eClass").value,s=$("eSpec").value,r=$("eRole").value,s2=($("eSpec2").value||"").trim(),r2=$("eRole2").value,n=Number($("eIlvl").value);
+  const c=buildForeverCharacterName($("eCharFirst").value,$("eCharLast").value),cl=$("eClass").value,s=$("eSpec").value,r=$("eRole").value,s2=($("eSpec2").value||"").trim(),r2=$("eRole2").value,n=Number($("eIlvl").value);
+  if(!$("eCharFirst").value.trim()||!$("eCharLast").value.trim())return alert("Bitte Vorname und Nachname des Charakters ausfüllen.");
   if(!cl||!s||!r||!n)return alert("Bitte Klasse, 1. Spezialisierung und Gegenstandsstufe ausfüllen.");
   if(s2===s)return alert("Die Offspec muss sich von der 1. Spezialisierung unterscheiden.");
-  const payload={p_id:id,p_player_name:managePlayer,p_pin:managePin,p_character_name:$("eChar").value.trim(),p_class_name:cl,p_spec:s,p_role:r,p_spec2:s2||null,p_role2:s2?(r2||null):null,p_item_level:n};
+  const payload={p_id:id,p_player_name:managePlayer,p_pin:managePin,p_character_name:c,p_class_name:cl,p_spec:s,p_role:r,p_spec2:s2||null,p_role2:s2?(r2||null):null,p_item_level:n};
   const {data,error}=await sb.rpc("update_my_raidkader",payload);
   if(error)return alert("Änderung fehlgeschlagen: "+error.message);
   if(data?.ok===false)return alert(data.message||"Änderung fehlgeschlagen.");
