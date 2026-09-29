@@ -3193,16 +3193,6 @@ nav .nav-main > button:first-child:hover{
 .hero-content{position:relative!important;z-index:10!important;}
 @media(max-width:700px){.hero::before{width:120px!important;height:120px!important;max-width:27vw!important;max-height:27vw!important;opacity:.10!important;}}
 </style>
-
-<style id="raidkader-mobile-centered-final">
-@media screen and (max-width:700px){
-  nav{width:100% !important;max-width:100% !important;margin:0 auto !important;padding:8px !important;box-sizing:border-box !important;transform:none !important;left:auto !important;right:auto !important;}
-  nav .nav-main{width:100% !important;max-width:100% !important;min-width:0 !important;margin:0 auto !important;padding:0 !important;box-sizing:border-box !important;transform:none !important;left:auto !important;right:auto !important;display:grid !important;grid-template-columns:minmax(0,1fr) !important;}
-  nav .nav-main > button:first-child{width:100% !important;max-width:100% !important;min-width:0 !important;margin:0 !important;justify-self:center !important;}
-  nav .nav-admin{width:100% !important;max-width:100% !important;min-width:0 !important;margin:0 auto !important;padding:0 !important;box-sizing:border-box !important;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
-  nav .nav-admin button{width:100% !important;max-width:100% !important;min-width:0 !important;margin:0 !important;justify-self:stretch !important;}
-}
-</style>
 </html>
 <style id="raidkader-mobile-optimierung">
 /* =========================================================
@@ -3530,4 +3520,52 @@ section,
 .hero > .kk-atmosphere .kk-particles{display:block !important;visibility:visible !important;opacity:1 !important;z-index:51 !important;}
 .hero > .kk-atmosphere .kk-particles i{display:block !important;visibility:visible !important;}
 .hero > .hero-content{z-index:100 !important;}
+</style>
+
+<style id="raidkader-mobile-4-columns-final">
+@media screen and (max-width:700px){
+  nav{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 auto !important;
+    padding:8px !important;
+    box-sizing:border-box !important;
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:6px !important;
+    transform:none !important;
+    left:auto !important;
+    right:auto !important;
+  }
+  nav .nav-main{
+    display:contents !important;
+    width:auto !important;
+    max-width:none !important;
+    min-width:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    transform:none !important;
+  }
+  nav .nav-admin{
+    display:contents !important;
+    width:auto !important;
+    max-width:none !important;
+    min-width:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+  nav .nav-separator{
+    display:none !important;
+  }
+  nav .nav-main > button:first-child,
+  nav .nav-admin button{
+    width:100% !important;
+    max-width:none !important;
+    min-width:0 !important;
+    margin:0 !important;
+    justify-self:stretch !important;
+    box-sizing:border-box !important;
+    white-space:nowrap !important;
+  }
+}
 </style>
