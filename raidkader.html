@@ -1670,6 +1670,65 @@ nav{
 .logged-char-main span{color:#aebbc5;font-size:12px;white-space:normal}
 @media(max-width:700px){.logged-profile-panel{width:100%;margin:0 0 14px}.logged-profile-card{padding:15px}.logged-profile-head{align-items:stretch;flex-direction:column}.logged-profile-actions{justify-content:stretch}.logged-profile-actions .btn{flex:1 1 100%;width:100%}.logged-char-list{grid-template-columns:1fr}}
 </style>
+
+<style id="FINAL-RAIDKADER-MOBILE-NAV">
+@media screen and (max-width: 700px){
+  html,body{width:100% !important;max-width:100% !important;overflow-x:hidden !important;}
+  nav{width:100% !important;max-width:100% !important;box-sizing:border-box !important;padding:8px !important;}
+  nav .nav-main{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    gap:8px !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+  }
+  nav .nav-main > button:first-child{
+    display:flex !important;
+    grid-column:1 !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    height:46px !important;
+    min-height:46px !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+  }
+  nav .nav-separator{display:none !important;}
+  nav .nav-admin{
+    display:grid !important;
+    grid-column:1 !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    gap:8px !important;
+    margin:0 !important;
+    padding:0 !important;
+    box-sizing:border-box !important;
+  }
+  nav .nav-admin button{
+    display:flex !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    height:46px !important;
+    min-height:46px !important;
+    margin:0 !important;
+    padding:0 6px !important;
+    box-sizing:border-box !important;
+    white-space:nowrap !important;
+    font-size:12px !important;
+  }
+}
+@media screen and (max-width:430px){
+  nav .nav-main > button:first-child{height:42px !important;min-height:42px !important;}
+  nav .nav-admin{gap:5px !important;}
+  nav .nav-admin button{height:42px !important;min-height:42px !important;font-size:11px !important;padding:0 3px !important;}
+}
+</style>
 </head>
 <body>
 <header class="hero">
@@ -3520,18 +3579,4 @@ section,
 .hero > .kk-atmosphere .kk-particles{display:block !important;visibility:visible !important;opacity:1 !important;z-index:51 !important;}
 .hero > .kk-atmosphere .kk-particles i{display:block !important;visibility:visible !important;}
 .hero > .hero-content{z-index:100 !important;}
-</style>
-
-<style id="raidkader-mobile-3-layout-final">
-@media (max-width:700px){
-  html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important;}
-  nav{width:100vw!important;max-width:100vw!important;margin:0!important;padding:6px 0!important;box-sizing:border-box!important;}
-  nav .nav-main{width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;box-sizing:border-box!important;}
-  nav .nav-main > button:first-child{grid-column:1 / -1!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important;}
-  nav .nav-separator{display:none!important;}
-  nav .nav-admin{grid-column:1 / -1!important;width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;box-sizing:border-box!important;}
-  nav .nav-admin button{width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important;}
-  nav .nav-admin button:last-child{grid-column:1 / -1!important;}
-}
-@media (max-width:430px){nav{padding:5px 0!important;}nav .nav-main,nav .nav-admin{gap:5px!important;}}
 </style>
