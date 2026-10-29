@@ -2022,7 +2022,7 @@ async function saveProfile(){
           characterId=found?.id || null;
         }
         if(!characterId){await load();return alert("Charakter wurde angelegt, aber die Offspec konnte nicht gespeichert werden.");}
-        const {error:offError}=await sb.rpc("update_my_raidkader",{p_id:characterId,p_player_name:verifiedPlayer,p_pin:verifiedPin,p_character_name:c,p_class_name:cl,p_spec:s,p_role:r,p_spec2:s2,p_role2:r2||null,p_item_level:n});
+        const {error:offError}=await sb.rpc("update_my_raidkader",{p_id:characterId,p_player_name:verifiedPlayer,p_pin:verifiedPin,p_character_name:c,p_class_name:cl,p_spec:s,p_role:r,p_offspec:s2});
         if(offError){await load();return alert("Charakter wurde angelegt, aber die Offspec konnte nicht gespeichert werden: "+offError.message);}
       }
       closeModal();return load();
@@ -2056,9 +2056,7 @@ async function saveProfile(){
         p_class_name:cl,
         p_spec:s,
         p_role:r,
-        p_spec2:s2,
-        p_role2:r2||null,
-        p_item_level:n
+        p_offspec:s2
       });
       if(offError)return alert("Profil wurde angelegt, aber die Offspec konnte nicht gespeichert werden: "+offError.message);
     }
@@ -2160,34 +2158,49 @@ function editMine(r){
       <div class="form-group field-pair"><label>Offspec-Rolle</label><select id="eRole2" disabled><option>Automatisch</option></select></div>
       <div class="form-group field-ilvl"><label>Gegenstandsstufe *</label><input id="eIlvl" type="number" min="1" max="999" value="${esc(r.item_level)}" placeholder="z. B. 20"></div>
     </div>
-    <div class="modal-actions"><button class="btn btn-secondary" onclick="manage(managePlayer)">↩ Zurück</button><button class="btn btn-primary" onclick="saveMine(${r.id})">💾 Änderungen speichern</button></div>
+    <div id="saveMineStatus" class="muted" role="status" aria-live="polite" style="margin-top:10px;min-height:1.2em"></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="manage(managePlayer)">↩ Zurück</button><button id="saveMineBtn" type="button" class="btn btn-primary" onclick="saveMine(${r.id})">💾 Änderungen speichern</button></div>
   </div>`);
   updateSpecs("eClass","eSpec","eRole","eSpec2","eRole2");$("eSpec").value=r.spec;$("eSpec").onchange();const offspec=getOffspec(r);if(offspec)$("eSpec2").value=offspec;$("eSpec2").onchange();
 }
 async function saveMine(id){
-  const c=buildForeverCharacterName($("eCharFirst").value,$("eCharLast").value),cl=$("eClass").value,s=$("eSpec").value,r=$("eRole").value,s2=($("eSpec2").value||"").trim(),r2=$("eRole2").value,n=Number($("eIlvl").value);
-  if(!$("eCharFirst").value.trim()||!$("eCharLast").value.trim())return alert("Bitte Vorname und Nachname des Charakters ausfüllen.");
-  if(!cl||!s||!r||!n)return alert("Bitte Klasse, 1. Spezialisierung und Gegenstandsstufe ausfüllen.");
-  if(s2===s)return alert("Die Offspec muss sich von der 1. Spezialisierung unterscheiden.");
-  const payload={p_id:id,p_player_name:managePlayer,p_pin:managePin,p_character_name:c,p_class_name:cl,p_spec:s,p_role:r,p_spec2:s2||null,p_role2:s2?(r2||null):null,p_item_level:n};
-  const {data,error}=await sb.rpc("update_my_raidkader",payload);
-  if(error)return alert("Änderung fehlgeschlagen: "+error.message);
-  if(data?.ok===false)return alert(data.message||"Änderung fehlgeschlagen.");
+  const button=$("saveMineBtn"),status=$("saveMineStatus");
+  const setStatus=(message)=>{if(status)status.textContent=message;};
+  if(button){button.disabled=true;button.textContent="⏳ Speichere …";}
+  setStatus("Änderungen werden gespeichert …");
+  try{
+    const first=$("eCharFirst"),last=$("eCharLast"),classField=$("eClass"),specField=$("eSpec"),roleField=$("eRole"),spec2Field=$("eSpec2"),role2Field=$("eRole2"),ilvlField=$("eIlvl");
+    if(!first||!last||!classField||!specField||!roleField||!spec2Field||!role2Field||!ilvlField){
+      throw new Error("Das Bearbeitungsformular ist unvollständig. Bitte schließe es und öffne den Charakter erneut.");
+    }
+    const c=buildForeverCharacterName(first.value,last.value),cl=classField.value,s=specField.value,role=roleField.value,s2=(spec2Field.value||"").trim(),r2=role2Field.value,n=Number(ilvlField.value);
+    if(!first.value.trim()||!last.value.trim())throw new Error("Bitte Vorname und Nachname des Charakters ausfüllen.");
+    if(!cl||!s||!role||!Number.isFinite(n)||n<1||n>999)throw new Error("Bitte Klasse, 1. Spezialisierung und eine gültige Gegenstandsstufe (1–999) ausfüllen.");
+    if(s2===s)throw new Error("Die Offspec muss sich von der 1. Spezialisierung unterscheiden.");
+    if(!managePlayer||!managePin)throw new Error("Deine Anmeldung ist abgelaufen. Bitte melde dich erneut mit deinem PIN an.");
 
-  // Die bestehende RPC übernimmt bei der aktuellen Datenbank die Gegenstandsstufe
-  // nicht zuverlässig. Deshalb wird item_level zusätzlich über eine eigene,
-  // PIN-geschützte RPC gespeichert.
-  const {data:ilvlData,error:ilvlError}=await sb.rpc("update_my_raidkader_item_level",{
-    p_id:id,
-    p_player_name:managePlayer,
-    p_pin:managePin,
-    p_item_level:n
-  });
-  if(ilvlError)return alert("Gegenstandsstufe konnte nicht gespeichert werden: "+ilvlError.message);
-  if(ilvlData?.ok===false)return alert(ilvlData.message||"Gegenstandsstufe konnte nicht gespeichert werden.");
+    const payload={p_id:Number(id),p_player_name:managePlayer,p_pin:managePin,p_character_name:c,p_class_name:cl,p_spec:s,p_role:role,p_offspec:s2||null};
+    const {data,error}=await sb.rpc("update_my_raidkader",payload);
+    if(error)throw new Error("Änderung fehlgeschlagen: "+error.message);
+    if(data===false||data?.ok===false)throw new Error(data?.message||"Die Datenbank hat die Änderung abgelehnt.");
 
-  await load();
-  manage(managePlayer)
+    const {data:ilvlData,error:ilvlError}=await sb.rpc("update_my_raidkader_item_level",{
+      p_id:Number(id),p_player_name:managePlayer,p_pin:managePin,p_item_level:n
+    });
+    if(ilvlError)throw new Error("Charakterdaten wurden übermittelt, aber die Gegenstandsstufe konnte nicht gespeichert werden: "+ilvlError.message);
+    if(ilvlData===false||ilvlData?.ok===false)throw new Error(ilvlData?.message||"Die Datenbank hat die Gegenstandsstufe nicht übernommen.");
+
+    await load();
+    setStatus("Gespeichert. Charakterliste wird aktualisiert …");
+    await manage(managePlayer);
+  }catch(err){
+    console.error("Raidkader saveMine error:",err);
+    const message=err?.message||String(err)||"Unbekannter Fehler beim Speichern.";
+    setStatus("Speichern fehlgeschlagen: "+message);
+    alert("Speichern fehlgeschlagen: "+message);
+  }finally{
+    if(button&&button.isConnected){button.disabled=false;button.textContent="💾 Änderungen speichern";}
+  }
 }
 async function deleteMine(id){if(!confirm("Diesen Charakter wirklich löschen?"))return;const {data,error}=await sb.rpc("delete_my_raidkader",{p_id:id,p_player_name:managePlayer,p_pin:managePin});if(error)return alert(error.message);if(data?.ok===false)return alert(data.message);await load();const left=rows.filter(x=>x.player_name.trim().toLowerCase()===managePlayer.trim().toLowerCase());left.length?manage(managePlayer):closeModal()}
 async function openAdminLogin(){if(isAdmin){await sb.auth.signOut();return}openModal('<h2>🔐 Admin Login</h2><div class="form-group"><label>E-Mail</label><input id="aMail" type="email"></div><div class="form-group"><label>Passwort</label><input id="aPass" type="password"></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="loginAdmin()">Einloggen</button></div>')}
