@@ -3985,7 +3985,7 @@ main > .raid-list-promo.raid-list-promo-wide{
 <div class="nav-admin">
 <button id="navLoginButton" class="nav-manage" onclick="handleNavLoginClick()">🔑 Login</button>
 <button id="navRegisterButton" class="nav-manage" onclick="openRaidkaderForm()">➕ Registrieren</button>
-<button id="navAddCharButton" class="nav-manage" onclick="openLoggedInRaidkaderManage()" style="display:none">👤 Raidkader Char hinzufügen</button>
+<button id="navAddCharButton" class="nav-manage" onclick="openLoggedInRaidkaderManage()" style="display:none">👤 Raidkader-Char hinzufügen oder bestehenden Char bearbeiten</button>
 <button class="nav-manage" onclick="openAdminLogin()">🔐 Admin</button>
 </div>
 </div>
@@ -5603,9 +5603,7 @@ async function saveRoster(){
         p_class_name:className,
         p_spec:spec,
         p_role:role,
-        p_spec2:spec2,
-        p_role2:role2||null,
-        p_item_level:ilvl
+        p_offspec:spec2||null
       });
       if(offError){
         alert("Charakter wurde angelegt, aber die Offspec konnte nicht gespeichert werden: "+offError.message);
@@ -5647,9 +5645,7 @@ async function saveRoster(){
       p_class_name:className,
       p_spec:spec,
       p_role:role,
-      p_spec2:spec2,
-      p_role2:role2||null,
-      p_item_level:ilvl
+      p_offspec:spec2||null
     });
     if(offError){alert("Profil wurde angelegt, aber die Offspec konnte nicht gespeichert werden: "+offError.message);return;}
   }
@@ -5754,7 +5750,7 @@ async function openLoggedInRaidkaderManage(){
     <div class="rk-manage-list">${items}</div>
     <p class="rk-muted-note">Du bist bereits über dein Raidprofil eingeloggt. Dein PIN muss nicht erneut eingegeben werden.</p>
     <div class="modal-actions">
-      <button class="btn btn-primary" onclick='closeModal();openRaidkaderForm(${JSON.stringify(logged.player)},"add")'>➕ Weiteren Charakter hinzufügen</button>
+      <button class="btn btn-primary" onclick='closeModal();openRaidkaderForm(${JSON.stringify(logged.player)},"add")'>➕ Charakter hinzufügen</button>
       <button class="btn btn-secondary" onclick="closeModal()">Schließen</button>
     </div>`);
 }
@@ -5784,7 +5780,7 @@ async function verifyRaidkaderManage(){
     <div class="rk-manage-list">${items}</div>
     <p class="rk-muted-note">Dein PIN bleibt nur für diese Verwaltungssitzung im Browser verfügbar.</p>
     <div class="modal-actions">
-      <button class="btn btn-primary" onclick="closeModal();openRaidkaderForm(${JSON.stringify(player)},"add")">➕ Weiteren Charakter hinzufügen</button>
+      <button class="btn btn-primary" onclick="closeModal();openRaidkaderForm(${JSON.stringify(player)},"add")">➕ Charakter hinzufügen oder bestehenden Char bearbeiten</button>
       <button class="btn btn-secondary" onclick="closeModal()">Schließen</button>
     </div>`);
 }
@@ -5793,10 +5789,12 @@ function openRaidkaderEdit(row){
   const classOptions=Object.keys(wowClasses).map(c=>`<option value="${escapeHTML(c)}" ${c===row.class_name?"selected":""}>${escapeHTML(c)}</option>`).join("");
   const spec2=row?.Offspec ?? row?.offspec ?? row?.spec2 ?? "";
   openModal(`<h2>✏️ ${escapeHTML(row.character_name)} bearbeiten</h2>
-    <div class="form-row"><div class="form-group"><label>Spielername</label><input id="rkePlayer" value="${escapeHTML(raidKaderManagePlayer)}" readonly></div><div class="form-group"><label>Vorname des Charakters</label><input id="rkeCharFirst" value="${escapeHTML(splitForeverCharacterName(row.character_name).first)}"></div><div class="form-group"><label>Nachname des Charakters</label><input id="rkeCharLast" value="${escapeHTML(splitForeverCharacterName(row.character_name).last)}"></div></div>
-    <div class="form-row"><div class="form-group"><label>Klasse</label><select id="rkeClass" onchange="updateEditSpecs()">${classOptions}</select></div><div class="form-group"><label>Spezialisierung</label><select id="rkeSpec"></select></div></div>
+    <div class="form-row"><div class="form-group"><label>Spielername</label><input id="rkePlayer" value="${escapeHTML(raidKaderManagePlayer)}" readonly></div></div>
+    <div class="form-row"><div class="form-group"><label>Vorname des Charakters</label><input id="rkeCharFirst" value="${escapeHTML(splitForeverCharacterName(row.character_name).first)}"></div><div class="form-group"><label>Nachname des Charakters</label><input id="rkeCharLast" value="${escapeHTML(splitForeverCharacterName(row.character_name).last)}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Klasse</label><select id="rkeClass" onchange="updateEditSpecs()">${classOptions}</select></div></div>
+    <div class="form-row"><div class="form-group"><label>Spezialisierung</label><select id="rkeSpec"></select></div><div class="form-group"><label>Rolle</label><select id="rkeRole" disabled></select></div></div>
     <div class="form-row"><div class="form-group"><label>2. Spezialisierung / Offspec <span class="muted">(optional)</span></label><select id="rkeSpec2"></select></div><div class="form-group"><label>Offspec-Rolle</label><select id="rkeRole2" disabled></select></div></div>
-    <div class="form-row"><div class="form-group"><label>Rolle</label><select id="rkeRole" disabled></select></div><div class="form-group"><label>Gegenstandsstufe</label><input id="rkeIlvl" type="number" min="1" max="999" value="${escapeHTML(String(row.item_level))}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Gegenstandsstufe</label><input id="rkeIlvl" type="number" min="1" max="999" value="${escapeHTML(String(row.item_level))}"></div></div>
     <div class="modal-actions"><button class="btn btn-secondary" onclick="openLoggedInRaidkaderManage()">↩ Zurück</button><button class="btn btn-primary" onclick="saveMyRaidkaderEdit(${row.id})">💾 Speichern</button></div>`);
   document.getElementById("rkeSpec").dataset.wanted=row.spec;
   document.getElementById("rkeSpec2").dataset.wanted=spec2;
@@ -5822,7 +5820,7 @@ function updateEditSpecs(){
 async function saveMyRaidkaderEdit(id){
   const character=buildForeverCharacterName(document.getElementById("rkeCharFirst").value,document.getElementById("rkeCharLast").value),className=document.getElementById("rkeClass").value,spec=document.getElementById("rkeSpec").value,role=document.getElementById("rkeRole").value,spec2=document.getElementById("rkeSpec2")?.value||"",role2=document.getElementById("rkeRole2")?.value||"",ilvl=Number(document.getElementById("rkeIlvl").value);
   if(!document.getElementById("rkeCharFirst").value.trim()||!document.getElementById("rkeCharLast").value.trim()||!className||!spec||!role||!ilvl){alert("Bitte Vorname, Nachname, Klasse, Spezialisierung und Gegenstandsstufe ausfüllen.");return;}
-  const {data,error}=await supabaseClient.rpc("update_my_raidkader",{p_id:Number(id),p_player_name:raidKaderManagePlayer,p_pin:raidKaderManagePin,p_character_name:character,p_class_name:className,p_spec:spec,p_role:role,p_spec2:spec2||null,p_role2:role2||null,p_item_level:ilvl});
+  const {data,error}=await supabaseClient.rpc("update_my_raidkader",{p_id:Number(id),p_player_name:raidKaderManagePlayer,p_pin:raidKaderManagePin,p_character_name:character,p_class_name:className,p_spec:spec,p_role:role,p_offspec:spec2||null});
   if(error){alert("Änderung fehlgeschlagen: "+error.message);return;} if(data?.ok===false){alert(data.message||"Änderung fehlgeschlagen.");return;}
   const {data:ilvlData,error:ilvlError}=await supabaseClient.rpc("update_my_raidkader_item_level",{p_id:Number(id),p_player_name:raidKaderManagePlayer,p_pin:raidKaderManagePin,p_item_level:ilvl});
   if(ilvlError){alert("Gegenstandsstufe konnte nicht gespeichert werden: "+ilvlError.message);return;} if(ilvlData?.ok===false){alert(ilvlData.message||"Gegenstandsstufe konnte nicht gespeichert werden.");return;}
