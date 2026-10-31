@@ -4901,10 +4901,10 @@ function openProfileLogin(){
   openModal(`<h2>🔐 Raidprofil anmelden</h2>
     <p class="muted">Melde dich mit dem persönlichen PIN deines Raidprofils an. Du hast kein Pin ? Registriere dich auf der Startseite. Danach kannst dich direkt für Events oder Raids anmelden.</p>
     <div class="form-group">
-      <label>Raidprofil-PIN *</label>
+      <label>Dein Event/Raidprofil-PIN *</label>
       <input id="profileLoginPin" inputmode="numeric" pattern="[0-9]{4,20}" maxlength="20" type="password" autocomplete="current-password" placeholder="4–20 Ziffern">
     </div>
-    <p class="signup-status-help">Der PIN gehört zu deinem Raidprofil und ist kein Admin-Login.</p>
+    <p class="signup-status-help"></p>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
       <button class="btn btn-primary" onclick="loginWithRaidProfilePin()">🔓 Einloggen</button>
