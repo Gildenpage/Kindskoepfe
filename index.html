@@ -4777,7 +4777,8 @@ function renderEvents(){
    const benchCards=bench.length?`<div class="player-grid status-player-grid">${bench.map(cardPlayer).join("")}</div>`:'<span class="muted">Keine Einträge</span>';
    const statusList=(arr)=>arr.length?`<div class="player-grid status-player-grid">${arr.map(cardPlayer).join("")}</div>`:'<span class="muted">Keine Einträge</span>';
    const requirementHtml=offgame
-     ? `<div class="offgame-signup-note"><strong>🌐 Off Game Event</strong><span>Anmeldung nur mit Spielerprofil / Spielernamen. Keine Klasse, Spec, Offspec, GS oder Rolle erforderlich.</span></div>`
+     ? `<div class="offgame-signup-note"><strong>🌐 Off Game Event</strong><span>Für dieses Event meldest du dich einfach nur mit deinem Profilnamen an !<br>
+Anders als bei unseren Raids gibt es hier keine festen Plätze für Tanks, Heiler oder DDs. Klasse, Spec, Offspec, GS oder Rolle spielen absolut keine Rolle !<br>Melde dich einfach an und sei dabei !</span></div>`
      : `<div class="requirements raid-role-summary">
          <div class="requirement tank"><strong>${tanks}/${e.tank_limit}</strong>🛡️ Tanks</div>
          <div class="requirement heal"><strong>${heals}/${e.heal_limit}</strong>💚 Heiler</div>
@@ -4813,7 +4814,7 @@ function renderEvents(){
          <button class="btn btn-secondary" onclick="openManageSignupChooserFor('event',${e.id})">${getLoggedInRaidProfile() ? '⚙️ Meine Anmeldung verwalten' : '🔑 Meine Anmeldung verwalten'}</button>
        </div>
        <p class="signup-roster-hint">${offgame
-         ? (getLoggedInRaidProfile() ? '<strong>Spielerprofil aktiv:</strong> Du meldest dich nur mit deinem Spielernamen an.' : '<strong>Hinweis:</strong> Für dieses Off Game Event benötigst du ein bestehendes Spielerprofil.')
+         ? (getLoggedInRaidProfile() ? '<strong>Spielerprofil aktiv:</strong> Du meldest dich nur mit deinem Spielernamen an.' : '<strong>Hinweis:</strong> Noch keinen Account zum Anmelden ? Registriere dich um dich für ein Event Anzumelden ! ')
          : (getLoggedInRaidProfile() ? '<strong>Raidprofil aktiv:</strong> Deine Anmeldung wird automatisch deinem eingeloggten Profil zugeordnet – kein PIN nötig.' : '<strong>Hinweis:</strong> Du kannst dich erst für ein Event anmelden, wenn du dich im Raidkader eingetragen hast. Verwende dafür den PIN deines Raidkader-Profils.')}
        </p>
      </div>
@@ -4979,10 +4980,12 @@ function openSignup(type,id){
     openModal(`<h2>🌐 Offgameevent-Anmeldung</h2>
       <p class="muted">${escapeHTML(item.name)}</p>
       <div class="rk-signup-context"><strong>👤 Anmeldung über dein Spielerprofil</strong><br>
-      <span class="muted">Für dieses Event reichen Spielerprofil und Spielername. Klasse, Spec, Offspec, GS, Rolle und Charakter werden nicht benötigt.</span></div>
+      <span class="muted">Für dieses Event meldest du dich einfach nur mit deinem Spielerprofil-PIN * an !<br>
+Anders als bei unseren Raids gibt es hier keine festen Plätze für Tanks, Heiler oder DDs. Klasse, Spec, Offspec, GS oder Rolle spielen absolut keine Rolle !<br>
+Melde dich einfach mit deinem Pin* an und sei dabei !</span></div>
       <div class="form-group"><label>Spielerprofil-PIN *</label>
       <input id="signupPin" inputmode="numeric" pattern="[0-9]{4,20}" maxlength="20" type="password" autocomplete="off" placeholder="4–20 Ziffern">
-      <p class="signup-status-help">Es muss bereits ein Spielerprofil mit diesem PIN existieren.</p></div>
+      <p class="signup-status-help"></p></div>
       <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
       <button class="btn btn-primary" onclick="verifyOffgameSignupPin(${id})">Weiter</button></div>`);
     return;
