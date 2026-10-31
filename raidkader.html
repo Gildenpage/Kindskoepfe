@@ -1970,7 +1970,7 @@ function profileForm(player="",mode="create",existing=null){
     <div class="form-group"><label>Offspec-Rolle</label><select id="pRole2" disabled><option>Automatisch</option></select></div>
     <div class="form-group profile-single"><label>Gegenstandsstufe *</label><input id="pIlvl" type="number" min="1" max="999" value="${esc(e.item_level||"")}" placeholder="z. B. 20"></div>
     <div class="form-group profile-single"><label>Persönlicher PIN *</label><input id="pPin" type="password" inputmode="numeric" maxlength="20" autocomplete="new-password" placeholder="4–20 Ziffern"></div>
-    <div class="pin-hint">Gebe deinem Profil einen 4-20 stelligen Pin und merke ihn dir gut damit du dich später damit einloggen kannst um weitere characktere hinzuzufügen / bearbeiten oder dich für events und raids anmelden kannst</div>
+    <div class="pin-hint">Gebe deinem Profil einen 4-20 stelligen Pin* und merke ihn dir gut !<br>Über Login kannst du weitere Characktere hinzuzufügen / bearbeiten oder dich für Events und Raids anmelden.</div>
   </div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="saveProfile()">➕ Profil & Charakter speichern</button></div>`);
   if($("pClass").value){updateSpecs("pClass","pSpec","pRole","pSpec2","pRole2");if(e.spec)$("pSpec").value=e.spec;$("pSpec").onchange();if(getOffspec(e))$("pSpec2").value=getOffspec(e);$("pSpec2").onchange();}
 }
