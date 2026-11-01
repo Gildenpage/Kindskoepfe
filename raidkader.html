@@ -1863,6 +1863,13 @@ function renderLoggedInProfile(){
   </div>`;
 }
 
+function formatRaidkaderDate(value){
+  if(!value)return "—";
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime()))return "—";
+  return date.toLocaleDateString("de-DE");
+}
+
 function render(){
   renderLoggedInProfile();
   const groups={};
@@ -1891,7 +1898,7 @@ function render(){
         <div class="actions"></div>
       </div>
       <div class="table-wrap"><table><thead><tr>
-        <th>Charakter</th><th>Klasse</th><th>Spec</th><th>Rolle</th><th>Offspec</th><th>OS/Rolle</th><th>GS</th><th>Verwaltung</th>
+        <th>Charakter</th><th>Klasse</th><th>Spec</th><th>Rolle</th><th>Offspec</th><th>OS/Rolle</th><th>GS</th>${isAdmin?`<th>Zuletzt geändert</th>`:""}<th>Verwaltung</th>
       </tr></thead><tbody>
         ${g.rows.map(r=>`<tr>
           <td class="char">${esc(r.character_name)}</td>
@@ -1901,6 +1908,7 @@ function render(){
           <td>${getOffspec(r)?esc(getOffspec(r)):`<span class="muted">—</span>`}</td>
           <td>${getOffspecRole(r)?`<span class="role ${roleClass(getOffspecRole(r))}">${esc(getOffspecRole(r))}</span>`:`<span class="muted">—</span>`}</td>
           <td class="gs">${esc(r.item_level)}</td>
+          ${isAdmin?`<td class="meta">${formatRaidkaderDate(r.updated_at||r.modified_at||r.created_at||r.inserted_at)}</td>`:""}
           <td>${isAdmin?`<button class="btn btn-secondary small" onclick="adminEdit(${r.id})">✏️</button> <button class="btn btn-danger small" onclick="adminDelete(${r.id})">🗑️</button>`:`—`}</td>
         </tr>`).join("")}
       </tbody></table></div>
