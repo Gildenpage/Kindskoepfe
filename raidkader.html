@@ -1828,8 +1828,8 @@ async function loginRaidNav(){
   if(!data?.ok)return alert(data?.message||"PIN falsch oder Profil nicht gefunden.");
   const player=String(data.player_name||"").trim();
   if(!player)return alert("Zum PIN wurde kein Spielerprofil gefunden.");
-  const characters=Array.isArray(data.characters)?data.characters:[];
-  if(!characters.length)return alert("Zu diesem Spielerprofil wurden keine Charaktere gefunden.");
+  // Ein Profil bleibt auch dann gültig, wenn aktuell keine Charaktere existieren.
+  // Die Identität wird über raidkader_profiles / den Signup-Kontext geprüft.
   verifiedPlayer=player;
   verifiedPin=pin;
   managePlayer=player;
@@ -2006,15 +2006,15 @@ async function saveProfile(){
       const authPin=(verifiedPin||managePin||"").trim();
       if(!authPlayer||!authPin)return alert("Bitte zuerst deinen PIN bestätigen.");
 
-      const {data:profileRows,error:verifyError}=await sb.rpc("get_my_raidkader",{p_player_name:authPlayer,p_pin:authPin});
+      const {data:profileCheck,error:verifyError}=await sb.rpc("get_raidkader_signup_context",{p_pin:authPin});
       if(verifyError)return alert("PIN-Prüfung fehlgeschlagen: "+verifyError.message);
-      if(!profileRows?.length){
+      if(!profileCheck?.ok || String(profileCheck.player_name||"").trim().toLowerCase()!==authPlayer.toLowerCase()){
         verifiedPlayer="";
         verifiedPin="";
         return alert("PIN falsch oder Profil nicht gefunden. Bitte bestätige deinen PIN erneut.");
       }
 
-      const canonicalPlayer=String(profileRows[0].player_name||authPlayer).trim();
+      const canonicalPlayer=String(profileCheck.player_name||authPlayer).trim();
       verifiedPlayer=canonicalPlayer;
       verifiedPin=authPin;
 
@@ -2124,13 +2124,14 @@ function addChar(player){
   }
   openModal(`<h2>🔑 PIN erforderlich</h2><p class="muted">Für <strong>${esc(player)}</strong> bitte deinen persönlichen PIN eingeben.</p><div class="form-group"><label>PIN</label><input id="verifyPin" type="password" inputmode="numeric" maxlength="20"></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick='verifyAdd(${JSON.stringify(player)})'>🔓 Bestätigen</button></div>`);
 }
-async function verifyAdd(player){const pin=$("verifyPin").value.trim();const {data,error}=await sb.rpc("get_my_raidkader",{p_player_name:player,p_pin:pin});if(error)return alert(error.message);if(!data?.length)return alert("PIN falsch oder Profil nicht gefunden.");verifiedPlayer=player;verifiedPin=pin;closeModal();profileForm(player,"add")}
+async function verifyAdd(player){const pin=$("verifyPin").value.trim();const {data,error}=await sb.rpc("get_raidkader_signup_context",{p_pin:pin});if(error)return alert(error.message);if(!data?.ok||String(data.player_name||"").trim().toLowerCase()!==String(player).trim().toLowerCase())return alert("PIN falsch oder Profil nicht gefunden.");verifiedPlayer=String(data.player_name||player).trim();verifiedPin=pin;managePlayer=verifiedPlayer;managePin=pin;closeModal();profileForm(verifiedPlayer,"add")}
 
 async function manage(player=""){
   if(managePlayer===player && managePin){
-    const {data,error}=await sb.rpc("get_my_raidkader",{p_player_name:managePlayer,p_pin:managePin});
-    if(!error && data?.length){
-      openManageList(data);
+    const {data:check,error:checkError}=await sb.rpc("get_raidkader_signup_context",{p_pin:managePin});
+    if(!checkError && check?.ok && String(check.player_name||"").trim().toLowerCase()===String(player).trim().toLowerCase()){
+      const {data}=await sb.rpc("get_my_raidkader",{p_player_name:managePlayer,p_pin:managePin});
+      openManageList(data||[]);
       return;
     }
   }
@@ -2139,14 +2140,13 @@ async function manage(player=""){
 
 async function verifyManage(){
   const p=$("mPlayer").value.trim(),pin=$("mPin").value.trim();
+  const {data:check,error:checkError}=await sb.rpc("get_raidkader_signup_context",{p_pin:pin});
+  if(checkError)return alert(checkError.message);
+  if(!check?.ok||String(check.player_name||"").trim().toLowerCase()!==p.toLowerCase())return alert("PIN falsch oder Profil nicht gefunden.");
   const {data,error}=await sb.rpc("get_my_raidkader",{p_player_name:p,p_pin:pin});
   if(error)return alert(error.message);
-  if(!data?.length)return alert("PIN falsch oder keine Einträge gefunden.");
-  managePlayer=p;
-  managePin=pin;
-  verifiedPlayer=p;
-  verifiedPin=pin;
-  openManageList(data);
+  managePlayer=p;managePin=pin;verifiedPlayer=p;verifiedPin=pin;
+  openManageList(data||[]);
 }
 
 function openManageList(data){openModal(`<h2>👤 ${esc(managePlayer)} – Charaktere</h2><div class="manage-list">${data.map(r=>`<div class="manage-item"><div><strong>${esc(r.character_name)}</strong><span>${esc(r.class_name)} · ${esc(r.spec)} · Rolle: ${esc(r.role)}${getOffspec(r)?` · Offspec: ${esc(getOffspec(r))}`:""} · GS: ${esc(r.item_level)}</span></div><div><button class="btn btn-secondary small" onclick='editMine(${JSON.stringify(r)})'>✏️</button> <button class="btn btn-danger small" onclick="deleteMine(${r.id})">🗑️</button></div></div>`).join("")}</div><div class="modal-actions"><button class="btn btn-primary" onclick='closeModal();profileForm(${JSON.stringify(managePlayer)},"add")'>➕ Charakter hinzufügen</button><button class="btn btn-secondary" onclick="closeModal()">Schließen</button></div>`)}
@@ -2211,7 +2211,7 @@ async function saveMine(id){
     if(button&&button.isConnected){button.disabled=false;button.textContent="💾 Änderungen speichern";}
   }
 }
-async function deleteMine(id){if(!confirm("Diesen Charakter wirklich löschen?"))return;const {data,error}=await sb.rpc("delete_my_raidkader",{p_id:id,p_player_name:managePlayer,p_pin:managePin});if(error)return alert(error.message);if(data?.ok===false)return alert(data.message);await load();const left=rows.filter(x=>x.player_name.trim().toLowerCase()===managePlayer.trim().toLowerCase());left.length?manage(managePlayer):closeModal()}
+async function deleteMine(id){if(!confirm("Diesen Charakter wirklich löschen?"))return;const {data,error}=await sb.rpc("delete_my_raidkader",{p_id:id,p_player_name:managePlayer,p_pin:managePin});if(error)return alert(error.message);if(data?.ok===false)return alert(data.message);await load();const left=rows.filter(x=>String(x.player_name||"").trim().toLowerCase()===managePlayer.trim().toLowerCase());if(left.length)manage(managePlayer);else openManageList([])}
 async function openAdminLogin(){if(isAdmin){await sb.auth.signOut();return}openModal('<h2>🔐 Admin Login</h2><div class="form-group"><label>E-Mail</label><input id="aMail" type="email"></div><div class="form-group"><label>Passwort</label><input id="aPass" type="password"></div><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" onclick="loginAdmin()">Einloggen</button></div>')}
 async function loginAdmin(){const {data,error}=await sb.auth.signInWithPassword({email:$("aMail").value.trim(),password:$("aPass").value});if(error)return alert(error.message);closeModal();await adminState(data.session)}
 async function adminState(session){if(!session){isAdmin=false}else{const {data}=await sb.rpc("is_admin");isAdmin=data===true}$("adminStatus").classList.toggle("show",isAdmin);render()}
