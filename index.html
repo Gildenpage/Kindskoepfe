@@ -4921,8 +4921,8 @@ async function loginWithRaidProfilePin(){
   if(!data?.ok){alert(data?.message||"Kein Raidprofil mit diesem PIN gefunden.");return;}
 
   const characters=Array.isArray(data.characters)?data.characters:[];
-  if(!characters.length){alert("Zu diesem Raidprofil wurden keine Charaktere gefunden.");return;}
 
+  // Ein Raidprofil bleibt auch ohne Charaktere gültig.
   saveRaidProfileSession({player:data.player_name,pin,characters});
   raidKaderVerifiedPlayer=data.player_name;
   raidKaderVerifiedPin=pin;
@@ -4940,8 +4940,8 @@ async function restoreRaidProfileSession(){
   if(error || !data?.ok){clearRaidProfileSession();return;}
 
   const characters=Array.isArray(data.characters)?data.characters:[];
-  if(!characters.length){clearRaidProfileSession();return;}
 
+  // Leere Charakterliste ist kein Grund, die Profilsitzung zu löschen.
   saveRaidProfileSession({player:data.player_name,pin:stored.pin,characters});
   raidKaderVerifiedPlayer=data.player_name;
   raidKaderVerifiedPin=stored.pin;
@@ -5682,14 +5682,21 @@ async function verifyPinForAdd(player){
     return;
   }
 
-  const {data,error}=await supabaseClient.rpc("get_my_raidkader",{p_player_name:player,p_pin:pin});
+  const {data,error}=await supabaseClient.rpc("get_raidkader_signup_context",{p_pin:pin});
   if(error){alert("PIN-Prüfung fehlgeschlagen: "+error.message);return;}
-  if(!data?.length){alert("PIN falsch oder Profil nicht gefunden.");return;}
+  if(!data?.ok || normalizeName(data.player_name).toLowerCase()!==normalizeName(player).toLowerCase()){
+    alert(data?.message||"PIN falsch oder Profil nicht gefunden.");
+    return;
+  }
 
-  raidKaderVerifiedPlayer=player;
+  const characters=Array.isArray(data.characters)?data.characters:[];
+  saveRaidProfileSession({player:data.player_name,pin,characters});
+  raidKaderVerifiedPlayer=data.player_name;
   raidKaderVerifiedPin=pin;
+  raidKaderManagePlayer=data.player_name;
+  raidKaderManagePin=pin;
   closeModal();
-  openRaidkaderForm(player,"add");
+  openRaidkaderForm(data.player_name,"add");
 }
 
 function openRaidkaderManageFor(playerName){
@@ -5727,17 +5734,14 @@ async function openLoggedInRaidkaderManage(){
     p_pin:logged.pin
   });
   if(error){alert("Verwaltung konnte nicht geöffnet werden: "+error.message);return;}
-  if(!data?.length){
-    alert("Für dein Raidprofil wurden keine Charaktere gefunden.");
-    return;
-  }
+  const characters=Array.isArray(data)?data:[];
 
   raidKaderManagePlayer=logged.player;
   raidKaderManagePin=logged.pin;
   raidKaderVerifiedPlayer=logged.player;
   raidKaderVerifiedPin=logged.pin;
 
-  const items=data.map(row=>`
+  const items=characters.map(row=>`
     <div class="rk-manage-item">
       <div>
         <strong>${escapeHTML(row.character_name)}</strong>
@@ -5750,7 +5754,7 @@ async function openLoggedInRaidkaderManage(){
     </div>`).join("");
 
   openModal(`<h2>👤 ${escapeHTML(logged.player)} – Charaktere</h2>
-    <div class="rk-manage-list">${items}</div>
+    <div class="rk-manage-list">${items || '<p class="rk-muted-note">Du hast aktuell noch keine Charaktere eingetragen.</p>'}</div>
     <p class="rk-muted-note">Du bist bereits über dein Raidprofil eingeloggt. Dein PIN muss nicht erneut eingegeben werden.</p>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick='closeModal();openRaidkaderForm(${JSON.stringify(logged.player)},"add")'>➕ Charakter hinzufügen</button>
@@ -5763,14 +5767,24 @@ async function verifyRaidkaderManage(){
   const pin=document.getElementById("rkManagePin").value.trim();
   if(!player||!/^\d{4,20}$/.test(pin)){alert("Bitte Spielername und 4–6-stelligen PIN eingeben.");return;}
 
-  const {data,error}=await supabaseClient.rpc("get_my_raidkader",{p_player_name:player,p_pin:pin});
-  if(error){alert("Verwaltung konnte nicht geöffnet werden: "+error.message);return;}
-  if(!data?.length){alert("Keine Einträge gefunden oder PIN ist falsch.");return;}
+  const {data:authData,error:authError}=await supabaseClient.rpc("get_raidkader_signup_context",{p_pin:pin});
+  if(authError){alert("Verwaltung konnte nicht geöffnet werden: "+authError.message);return;}
+  if(!authData?.ok || normalizeName(authData.player_name).toLowerCase()!==normalizeName(player).toLowerCase()){
+    alert(authData?.message||"Keine Berechtigung oder PIN ist falsch.");
+    return;
+  }
 
-  raidKaderManagePlayer=player;
+  const {data:rows,error}=await supabaseClient.rpc("get_my_raidkader",{p_player_name:player,p_pin:pin});
+  if(error){alert("Charaktere konnten nicht geladen werden: "+error.message);return;}
+  const characters=Array.isArray(rows)?rows:[];
+
+  raidKaderManagePlayer=authData.player_name;
   raidKaderManagePin=pin;
+  raidKaderVerifiedPlayer=authData.player_name;
+  raidKaderVerifiedPin=pin;
+  saveRaidProfileSession({player:authData.player_name,pin,characters});
 
-  const items=data.map(row=>`
+  const items=characters.map(row=>`
     <div class="rk-manage-item">
       <div><strong>${escapeHTML(row.character_name)}</strong><span>${escapeHTML(row.class_name)} · ${escapeHTML(row.spec)} · ${escapeHTML(row.item_level)} GS</span></div>
       <div>
@@ -5780,10 +5794,10 @@ async function verifyRaidkaderManage(){
     </div>`).join("");
 
   openModal(`<h2>👤 ${escapeHTML(player)} – Charaktere</h2>
-    <div class="rk-manage-list">${items}</div>
+    <div class="rk-manage-list">${items || '<p class="rk-muted-note">Du hast aktuell noch keine Charaktere eingetragen.</p>'}</div>
     <p class="rk-muted-note">Dein PIN bleibt nur für diese Verwaltungssitzung im Browser verfügbar.</p>
     <div class="modal-actions">
-      <button class="btn btn-primary" onclick="closeModal();openRaidkaderForm(${JSON.stringify(player)},"add")">➕ Charakter hinzufügen oder bestehenden Char bearbeiten</button>
+      <button class="btn btn-primary" onclick='closeModal();openRaidkaderForm(${JSON.stringify(player)},"add")'>➕ Charakter hinzufügen oder bestehenden Char bearbeiten</button>
       <button class="btn btn-secondary" onclick="closeModal()">Schließen</button>
     </div>`);
 }
@@ -5838,8 +5852,7 @@ async function deleteMyRaidkader(id){
   if(error){alert("Löschen fehlgeschlagen: "+error.message);return;}
   if(data?.ok===false){alert(data.message||"Löschen fehlgeschlagen.");return;}
   await loadRaidkader();
-  const remaining=raidKaderRows.filter(r=>r.player_name.trim().toLowerCase()===raidKaderManagePlayer.trim().toLowerCase());
-  if(remaining.length) await verifyRaidkaderManage(); else closeModal();
+  await openLoggedInRaidkaderManage();
   showToast("🗑️ Charakter gelöscht.");
 }
 
